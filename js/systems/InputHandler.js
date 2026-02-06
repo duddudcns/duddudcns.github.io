@@ -34,7 +34,10 @@ class InputHandler {
         } else if (['arrowleft', 'arrowright', 'arrowdown'].includes(key)) {
             event.preventDefault();
         }
-        this.game.draw();
+
+        if (this.game.gameRunning && !this.game.gamePaused) {
+            this.game.draw();
+        }
     }
 
     handleKeyUp(event) {

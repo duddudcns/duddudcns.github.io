@@ -18,6 +18,7 @@ class GameEngine {
         this.consecutiveType = null;
         this.consecutiveCount = 0;
 
+        // InputHandler를 가장 마지막에 초기화하여 this가 안정적으로 넘어가도록 함
         this.input = new InputHandler(this);
     }
 
