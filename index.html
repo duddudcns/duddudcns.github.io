@@ -19,174 +19,237 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            padding: 0;
         }
 
-        .game-container {
+        .game-wrapper {
             background: #1a1a2e;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            color: white;
-            max-width: 100%;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
             max-height: 100vh;
-            overflow: auto;
         }
 
         .game-header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .game-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            font-size: 1.6rem;
             color: #00d4ff;
             text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            margin: 0;
         }
 
         .version-badge {
             display: inline-block;
             background: #00d4ff;
             color: #1a1a2e;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 3px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: bold;
-            margin-left: 10px;
+            margin-left: 8px;
         }
 
         .game-content {
             display: grid;
-            grid-template-columns: 300px 200px;
-            gap: 10px;
-            justify-content: center;
+            grid-template-columns: 320px 1fr;
+            gap: 15px;
+            flex: 1;
+            min-height: 0;
         }
 
         .game-board {
             background: #0f1419;
-            border: 3px solid #00d4ff;
-            border-radius: 5px;
+            border: 2px solid #00d4ff;
+            border-radius: 4px;
             display: grid;
-            grid-template-columns: repeat(10, 30px);
-            grid-template-rows: repeat(20, 30px);
-            gap: 1px;
-            padding: 5px;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+            gap: 0;
+            aspect-ratio: 10 / 20;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
         }
 
         .cell {
-            background: #1a1a2e;
-            border: 1px solid #333;
-            border-radius: 2px;
+            background: #0f1419;
+            border: 0.5px solid #1a2a3a;
+            aspect-ratio: 1;
         }
 
         .cell.filled {
             background: #00d4ff;
-            box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.3);
-        }
-
-        .cell.preview {
-            background: rgba(0, 212, 255, 0.3);
-            border: 1px dashed #00d4ff;
+            box-shadow: inset 0 0 5px rgba(0, 212, 255, 0.4);
+            border: 0.5px solid #00b0d4;
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            min-height: 0;
         }
 
-        .info-panel {
+        .stats-panel {
             background: #16213e;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 4px solid #00d4ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #00d4ff;
         }
 
-        .info-label {
-            font-size: 0.9rem;
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
             color: #aaa;
             text-transform: uppercase;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
-        .info-value {
-            font-size: 2rem;
+        .stat-value {
+            font-size: 1.5rem;
             font-weight: bold;
             color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
         }
 
-        .next-block {
+        .next-blocks-panel {
+            background: #16213e;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #00d4ff;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .next-blocks-label {
+            font-size: 0.85rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .next-blocks-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .next-block-preview {
             background: #0f1419;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #1a2a3a;
+        }
+
+        .next-block-main {
             display: grid;
-            grid-template-columns: repeat(4, 25px);
-            grid-template-rows: repeat(4, 25px);
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
             gap: 1px;
+            margin-bottom: 8px;
         }
 
-        .next-block .cell {
-            width: 25px;
-            height: 25px;
+        .next-block-small {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.5px;
         }
 
-        .controls {
-            margin-top: 10px;
+        .next-block-preview .cell {
+            aspect-ratio: 1;
+        }
+
+        .controls-panel {
+            background: #16213e;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #00d4ff;
             text-align: center;
+        }
+
+        .controls-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
         }
 
         button {
             background: #00d4ff;
             color: #1a1a2e;
             border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
+            padding: 8px 12px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            transition: all 0.3s;
-            margin: 5px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         button:hover {
             background: #00a8cc;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 212, 255, 0.3);
         }
 
         button:active {
             transform: translateY(0);
         }
 
-        .button-group {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .instructions {
+        .instructions-panel {
             background: #16213e;
-            padding: 15px;
-            border-radius: 5px;
-            font-size: 0.9rem;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #00d4ff;
+            font-size: 0.8rem;
             line-height: 1.6;
+            color: #ddd;
         }
 
-        .instructions h3 {
-            color: #00d4ff;
-            margin-bottom: 10px;
+        .instructions-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
-        .instructions p {
-            margin: 5px 0;
+        .instruction-item {
+            margin-bottom: 4px;
         }
 
-        .game-over {
+        .game-over-modal {
             display: none;
             position: fixed;
             top: 50%;
@@ -201,18 +264,24 @@
             box-shadow: 0 0 30px rgba(255, 0, 110, 0.5);
         }
 
-        .game-over h2 {
+        .game-over-modal h2 {
             color: #ff006e;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-size: 2rem;
         }
 
-        .game-over p {
-            font-size: 1.5rem;
+        .game-over-modal p {
+            font-size: 1.3rem;
+            color: #ddd;
             margin-bottom: 20px;
         }
 
-        .release-notes {
+        .game-over-modal button {
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+
+        .release-notes-modal {
             display: none;
             position: fixed;
             top: 50%;
@@ -229,71 +298,76 @@
             overflow-y: auto;
             width: 90%;
             max-width: 600px;
+            color: #ddd;
         }
 
-        .release-notes h2 {
+        .release-notes-modal h2 {
             color: #00d4ff;
             margin-bottom: 15px;
             font-size: 1.8rem;
         }
 
-        .release-notes .version-section {
-            margin-bottom: 20px;
+        .release-notes-modal .version-section {
+            margin-bottom: 15px;
         }
 
-        .release-notes .version-title {
+        .release-notes-modal .version-title {
             color: #00d4ff;
             font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
         }
 
-        .release-notes ul {
+        .release-notes-modal ul {
             margin-left: 20px;
             line-height: 1.8;
         }
 
-        .release-notes li {
-            margin-bottom: 8px;
+        .release-notes-modal li {
+            margin-bottom: 6px;
+            color: #ddd;
         }
 
-        .close-notes {
+        .close-modal-btn {
             float: right;
             font-size: 2rem;
             font-weight: bold;
             color: #00d4ff;
             cursor: pointer;
             line-height: 1;
+            background: none;
+            border: none;
+            padding: 0;
+            width: auto;
+            transition: color 0.2s;
         }
 
-        .close-notes:hover {
+        .close-modal-btn:hover {
             color: #ff006e;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 1000px) {
             .game-content {
                 grid-template-columns: 1fr;
-                gap: 15px;
             }
 
-            .game-board {
-                grid-template-columns: repeat(10, 25px);
-                grid-template-rows: repeat(20, 25px);
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
             }
 
-            .cell {
-                width: 25px;
-                height: 25px;
-            }
-
-            .game-header h1 {
-                font-size: 2rem;
+            .stats-panel,
+            .controls-panel,
+            .next-blocks-panel,
+            .instructions-panel {
+                flex: 1;
+                min-width: 150px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-wrapper">
         <div class="game-header">
             <h1>🎮 TETRIS <span class="version-badge">v1.0.0</span></h1>
         </div>
@@ -302,61 +376,63 @@
             <div class="game-board" id="gameBoard"></div>
 
             <div class="sidebar">
-                <div class="info-panel">
-                    <div class="info-label">점수</div>
-                    <div class="info-value" id="score">0</div>
+                <div class="stats-panel">
+                    <div class="stat-row">
+                        <span class="stat-label">점수</span>
+                        <span class="stat-value" id="score">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">레벨</span>
+                        <span class="stat-value" id="level">1</span>
+                    </div>
                 </div>
 
-                <div class="info-panel">
-                    <div class="info-label">레벨</div>
-                    <div class="info-value" id="level">1</div>
+                <div class="next-blocks-panel">
+                    <span class="next-blocks-label">다음 블록</span>
+                    <div class="next-blocks-container" id="nextBlocksContainer"></div>
                 </div>
 
-                <div class="info-panel">
-                    <div class="info-label">다음 블록</div>
-                    <div class="next-block" id="nextBlock"></div>
-                </div>
-
-                <div class="instructions">
-                    <h3>조작법</h3>
-                    <p>⬅️ ➡️ : 좌우 이동</p>
-                    <p>⬇️ : 아래로</p>
-                    <p>⬆️ 또는 W : 회전</p>
-                    <p>스페이스 : 빠르게 떨어뜨리기</p>
-                </div>
-
-                <div class="controls">
+                <div class="controls-panel">
+                    <span class="controls-label">컨트롤</span>
                     <div class="button-group">
                         <button onclick="togglePause()">일시정지</button>
-                        <button onclick="resetGame()">다시시작</button>
-                        <button onclick="showReleaseNotes()">릴리즈</button>
+                        <button onclick="resetGame()">재시작</button>
+                        <button onclick="showReleaseNotes()" style="grid-column: 1 / -1;">릴리즈</button>
                     </div>
+                </div>
+
+                <div class="instructions-panel">
+                    <span class="instructions-label">조작법</span>
+                    <div class="instruction-item">⬅️ ➡️ : 좌우이동</div>
+                    <div class="instruction-item">⬇️ : 낙하</div>
+                    <div class="instruction-item">⬆️/W : 회전</div>
+                    <div class="instruction-item">스페이스 : 빠르게떨어뜨리기</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="game-over" id="gameOverModal">
+    <div class="game-over-modal" id="gameOverModal">
         <h2>게임 오버!</h2>
         <p>최종 점수: <span id="finalScore">0</span></p>
         <button onclick="resetGame()">다시 시작</button>
     </div>
 
-    <div class="release-notes" id="releaseNotesModal">
-        <span class="close-notes" onclick="closeReleaseNotes()">&times;</span>
+    <div class="release-notes-modal" id="releaseNotesModal">
+        <button class="close-modal-btn" onclick="closeReleaseNotes()">&times;</button>
         <h2>릴리즈 노트</h2>
         
         <div class="version-section">
             <div class="version-title">v1.0.0 - 초기 릴리즈</div>
             <ul>
-                <li>✓ 완전한 테트리스 게임플레이 구현</li>
-                <li>✓ 7가지 기본 테트로미노 (I, O, T, S, Z, J, L)</li>
+                <li>✓ 완전한 테트리스 게임플레이</li>
+                <li>✓ 7가지 테트로미노</li>
                 <li>✓ 점수 및 레벨 시스템</li>
-                <li>✓ 다음 블록 미리보기</li>
-                <li>✓ 키보드 컨트롤 (방향키, 회전, 빠른 낙하)</li>
-                <li>✓ 일시정지 / 다시시작 기능</li>
-                <li>✓ 반응형 디자인 (모바일/태블릿/데스크톱)</li>
-                <li>✓ 다시운 컬러 테마</li>
+                <li>✓ 다음 5개 블록 미리보기</li>
+                <li>✓ 키보드 컨트롤</li>
+                <li>✓ 일시정지 / 재시작</li>
+                <li>✓ 반응형 디자인</li>
+                <li>✓ 어두운 테마</li>
             </ul>
         </div>
     </div>
@@ -364,7 +440,6 @@
     <script>
         const COLS = 10;
         const ROWS = 20;
-        const BLOCK_SIZE = 1;
 
         const PIECES = {
             I: { shape: [[1,1,1,1]], color: '#00d4ff' },
@@ -382,10 +457,12 @@
         let gameRunning = true;
         let gamePaused = false;
         let currentPiece;
-        let nextPiece;
-        let currentX = 3;
-        let currentY = -1;
+        let currentX = 0;
+        let currentY = 0;
+        let nextBlocks = [];
         let dropInterval;
+        let spacePressed = false;
+        let keys = {};
 
         function initGame() {
             board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
@@ -393,8 +470,15 @@
             level = 1;
             gameRunning = true;
             gamePaused = false;
+            spacePressed = false;
+            keys = {};
             document.getElementById('gameOverModal').style.display = 'none';
-            nextPiece = getRandomPiece();
+            
+            nextBlocks = [];
+            for (let i = 0; i < 5; i++) {
+                nextBlocks.push(getRandomPiece());
+            }
+            
             spawnNewPiece();
             startGame();
         }
@@ -405,13 +489,13 @@
         }
 
         function spawnNewPiece() {
-            currentPiece = nextPiece;
-            nextPiece = getRandomPiece();
-            currentX = Math.floor(COLS / 2) - 1;
-            currentY = -1;
-            updateNextBlockDisplay();
+            currentPiece = nextBlocks.shift();
+            nextBlocks.push(getRandomPiece());
+            currentX = Math.floor(COLS / 2) - 2;
+            currentY = 0;
+            updateNextBlocksDisplay();
 
-            if (!isValidMove(0, 1, currentPiece)) {
+            if (!isValidMove(0, 0, currentPiece)) {
                 gameOver();
             }
         }
@@ -558,37 +642,52 @@
             document.getElementById('level').textContent = level;
         }
 
-        function updateNextBlockDisplay() {
-            const nextBlockContainer = document.getElementById('nextBlock');
-            nextBlockContainer.innerHTML = '';
-            const shape = PIECES[nextPiece].shape;
-            const grid = Array(4).fill().map(() => Array(4).fill(0));
+        function updateNextBlocksDisplay() {
+            const container = document.getElementById('nextBlocksContainer');
+            container.innerHTML = '';
 
-            for (let i = 0; i < shape.length; i++) {
-                for (let j = 0; j < shape[i].length; j++) {
-                    if (shape[i][j]) {
-                        grid[i + 1][j + 1] = 1;
+            nextBlocks.forEach((piece, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'next-block-preview';
+
+                const grid = Array(4).fill().map(() => Array(4).fill(0));
+                const shape = PIECES[piece].shape;
+
+                const startRow = Math.max(0, 2 - shape.length);
+                const startCol = Math.max(0, 2 - shape[0].length);
+                for (let i = 0; i < shape.length; i++) {
+                    for (let j = 0; j < shape[i].length; j++) {
+                        if (shape[i][j]) {
+                            grid[startRow + i][startCol + j] = 1;
+                        }
                     }
                 }
-            }
 
-            for (let i = 0; i < 4; i++) {
-                for (let j = 0; j < 4; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    if (grid[i][j]) {
-                        cell.classList.add('filled');
-                        cell.style.background = PIECES[nextPiece].color;
+                const gridClass = index === 0 ? 'next-block-main' : 'next-block-small';
+                const gridContainer = document.createElement('div');
+                gridContainer.className = gridClass;
+
+                const rows = index === 0 ? 4 : 3;
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        if (grid[i][j]) {
+                            cell.classList.add('filled');
+                            cell.style.background = PIECES[piece].color;
+                        }
+                        gridContainer.appendChild(cell);
                     }
-                    nextBlockContainer.appendChild(cell);
                 }
-            }
+
+                preview.appendChild(gridContainer);
+                container.appendChild(preview);
+            });
         }
 
         function togglePause() {
             if (gameRunning) {
                 gamePaused = !gamePaused;
-                document.querySelector('button').textContent = gamePaused ? '계속' : '일시정지';
             }
         }
 
@@ -611,25 +710,59 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (!gameRunning || gamePaused) return;
+            if (!gameRunning) return;
+
+            keys[e.key.toLowerCase()] = true;
+
+            if (gamePaused && e.key !== ' ') return;
+
             switch(e.key) {
-                case 'ArrowLeft': moveLeft(); break;
-                case 'ArrowRight': moveRight(); break;
-                case 'ArrowDown': moveDown(); break;
+                case 'ArrowLeft':
+                    moveLeft();
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    moveRight();
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    moveDown();
+                    e.preventDefault();
+                    break;
                 case 'ArrowUp':
                 case 'w':
-                case 'W': rotate(); break;
-                case ' ': 
+                case 'W':
+                    rotate();
                     e.preventDefault();
-                    while (moveDown());
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (!spacePressed) {
+                        spacePressed = true;
+                        while (moveDown());
+                        lockPiece();
+                        const lines = clearLines();
+                        if (lines > 0) {
+                            score += lines * lines * 100;
+                            if (score > level * 1000) level++;
+                        }
+                        spawnNewPiece();
+                        startGame();
+                    }
                     break;
             }
         });
 
-        // 릴리즈 노트 모달 외부 클릭 시 닫기
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+            if (e.key === ' ') {
+                spacePressed = false;
+            }
+        });
+
         window.onclick = function(event) {
             const modal = document.getElementById('releaseNotesModal');
-            if (event.target == modal) {
+            if (event.target === modal) {
                 modal.style.display = 'none';
             }
         };
