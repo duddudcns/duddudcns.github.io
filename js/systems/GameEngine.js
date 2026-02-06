@@ -24,6 +24,12 @@ class GameEngine {
         this.consecutiveType = null;
         this.consecutiveCount = 0;
 
+        // 효과 관련 상태
+        this.flashLines = []; // 지워질 줄 인덱스
+        this.flashTimer = 0;
+        this.landingEffect = { active: false, x: 0, y: 0, timer: 0 };
+        this.shakeTimer = 0;
+
         // InputHandler를 가장 마지막에 초기화하여 this가 안정적으로 넘어가도록 함
         this.input = new InputHandler(this);
     }
@@ -112,6 +118,21 @@ class GameEngine {
                 });
             });
         }
+
+        // 라인 삭제 효과 (발광)
+        if (this.flashTimer > 0) {
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${this.flashTimer / 200})`;
+            this.flashLines.forEach(y => {
+                this.ctx.fillRect(0, y * BLOCK_SIZE, this.canvas.width, BLOCK_SIZE);
+            });
+        }
+
+        // 착지 효과
+        if (this.landingEffect.active) {
+            const opacity = this.landingEffect.timer / 150;
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.5})`;
+            this.ctx.fillRect(0, this.landingEffect.y * BLOCK_SIZE, this.canvas.width, BLOCK_SIZE * 0.5);
+        }
     }
 
     drawNext() {
@@ -182,33 +203,71 @@ class GameEngine {
                 }
             });
         });
-        this.clearLines();
+
+        // 착지 효과 활성화
+        this.landingEffect = {
+            active: true,
+            y: this.currentPiece.y + this.currentPiece.shape.length - 1,
+            timer: 150
+        };
+
+        const linesToClear = [];
+        for (let y = ROWS - 1; y >= 0; y--) {
+            if (this.board[y].every(cell => cell !== 0)) {
+                linesToClear.push(y);
+            }
+        }
+
+        if (linesToClear.length > 0) {
+            this.flashLines = linesToClear;
+            this.flashTimer = 200; // 200ms 동안 반짝임
+
+            // 효과 종료 후 실제 라인 삭제
+            setTimeout(() => {
+                this.executeClearLines(linesToClear.length);
+                this.flashLines = [];
+            }, 200);
+        }
+
         this.currentPiece = this.createPiece();
     }
 
-    clearLines() {
-        let linesCleared = 0;
+    executeClearLines(linesCleared) {
         outer: for (let y = ROWS - 1; y >= 0; y--) {
             for (let x = 0; x < COLS; x++) { if (this.board[y][x] === 0) continue outer; }
             this.board.splice(y, 1);
             this.board.unshift(Array(COLS).fill(0));
-            linesCleared++;
             y++;
         }
-        if (linesCleared > 0) {
-            this.score += [0, 100, 300, 500, 800][linesCleared] * this.level;
-            this.level = Math.floor(this.score / 2000) + 1;
-            this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 100);
-            document.getElementById('score').innerText = this.score.toString().padStart(6, '0');
-            document.getElementById('level').innerText = this.level;
-        }
+
+        this.score += [0, 100, 300, 500, 800][linesCleared] * this.level;
+        this.level = Math.floor(this.score / 2000) + 1;
+        this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 100);
+        document.getElementById('score').innerText = this.score.toString().padStart(6, '0');
+        document.getElementById('level').innerText = this.level;
+    }
+
+    clearLines() {
+        // lockPiece에서 처리하므로 이 함수는 사용하지 않거나 executeClearLines로 대체
     }
 
     hardDrop() {
         if (!this.currentPiece) return;
         while (!this.currentPiece.collision(this.board, 0, 1)) this.currentPiece.y++;
+
+        // 화면 흔들림 효과 트리거
+        this.triggerShake();
+
         this.lockPiece();
         this.draw();
+    }
+
+    triggerShake() {
+        const wrapper = document.querySelector('.game-wrapper');
+        wrapper.classList.remove('shake');
+        void wrapper.offsetWidth; // 리플로우 강제
+        wrapper.classList.add('shake');
+        setTimeout(() => wrapper.classList.remove('shake'), 150);
     }
 
     togglePause() {
@@ -239,6 +298,14 @@ class GameEngine {
     update(time = 0) {
         const deltaTime = time - this.lastTime;
         this.lastTime = time;
+
+        // 효과 타이머 업데이트
+        if (this.flashTimer > 0) this.flashTimer -= deltaTime;
+        if (this.landingEffect.active) {
+            this.landingEffect.timer -= deltaTime;
+            if (this.landingEffect.timer <= 0) this.landingEffect.active = false;
+        }
+
         if (!this.gamePaused && this.gameRunning) {
             this.input.update(deltaTime);
             this.dropCounter += deltaTime;

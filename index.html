@@ -4,19 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.3.3</title>
+    <title>테트리스 게임 - v1.3.4</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.3</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.4</span></h1>
         </div>
 
         <div class="game-content">
             <div class="board-container">
                 <canvas id="gameCanvas"></canvas>
+            </div>
+
+            <div class="sidebar sidebar-next">
+                <div class="panel" style="text-align: center; height: 100%; display: flex; flex-direction: column;">
+                    <div class="panel-label">다음 블록들</div>
+                    <div class="next-preview-container">
+                        <canvas id="nextCanvas"></canvas>
+                    </div>
+                </div>
             </div>
 
             <div class="sidebar sidebar-stats">
@@ -45,15 +54,6 @@
                     <div>P : 일시정지</div>
                 </div>
             </div>
-
-            <div class="sidebar sidebar-next">
-                <div class="panel" style="text-align: center; height: 100%; display: flex; flex-direction: column;">
-                    <div class="panel-label">다음 블록들</div>
-                    <div class="next-preview-container">
-                        <canvas id="nextCanvas"></canvas>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -70,6 +70,15 @@
     <div id="releaseNotesModal" class="modal">
         <div class="modal-content">
             <h2>🚀 릴리즈 노트</h2>
+
+            <div class="release-item">
+                <div class="release-version">v1.3.4 - 연출 효과 및 배치 최적화</div>
+                <ul class="release-list">
+                    <li>컬럼 순서 변경 (게임판 | 다음 블록 | 정보)</li>
+                    <li>라인 삭제 시 발광 효과 및 하드 드롭 착지 효과 추가</li>
+                    <li>미리보기 영역 높이를 콘텐츠에 최적화</li>
+                </ul>
+            </div>
 
             <div class="release-item">
                 <div class="release-version">v1.3.3 - 3단 컬럼 레이아웃 적용</div>
