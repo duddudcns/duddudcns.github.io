@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.2.2</title>
+    <title>테트리스 게임 - v1.2.3</title>
     <style>
         * {
             margin: 0;
@@ -104,13 +104,20 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        .next-preview {
-            width: 100px;
-            height: 100px;
+        .next-preview-container {
             background: #000;
             margin: 0 auto;
             border-radius: 4px;
             border: 1px solid #1a2a3a;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #nextCanvas {
+            border-radius: 4px;
         }
 
         .button-group {
@@ -227,7 +234,7 @@
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.2</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.3</span></h1>
         </div>
 
         <div class="game-content">
@@ -247,8 +254,10 @@
                 </div>
 
                 <div class="panel" style="text-align: center;">
-                    <div class="panel-label">다음 블록</div>
-                    <canvas id="nextCanvas" class="next-preview"></canvas>
+                    <div class="panel-label">다음 블록들</div>
+                    <div class="next-preview-container">
+                        <canvas id="nextCanvas"></canvas>
+                    </div>
                 </div>
 
                 <div class="panel">
@@ -284,9 +293,18 @@
             <h2>🚀 릴리즈 노트</h2>
 
             <div class="release-item">
+                <div class="release-version">v1.2.3 - 랜덤성 및 미리보기 개선</div>
+                <ul class="release-list">
+                    <li>동일 블록 연속 출현 제한 (최대 2회)</li>
+                    <li>다음 블록 미리보기 확장 (총 5개 표시)</li>
+                    <li>미리보기 블록 중앙 정렬 로직 개선</li>
+                </ul>
+            </div>
+
+            <div class="release-item">
                 <div class="release-version">v1.2.2 - 조작 신뢰성 개선</div>
                 <ul class="release-list">
-                    <li>스페이스바(즉시 하강) 연속 입력 방지 (꾹 눌러도 한 번만 작동)</li>
+                    <li>스페이스바(즉시 하강) 연속 입력 방지</li>
                 </ul>
             </div>
 
@@ -294,25 +312,6 @@
                 <div class="release-version">v1.2.1 - 조작 간섭 수정</div>
                 <ul class="release-list">
                     <li>좌우 이동 중 회전 시 이동이 멈추는 현상 수정</li>
-                    <li>상태 기반 입력 시스템 도입으로 동시 조작 최적화</li>
-                </ul>
-            </div>
-
-            <div class="release-item">
-                <div class="release-version">v1.2.0 - 편의성 및 조작 개선</div>
-                <ul class="release-list">
-                    <li>전체 UI 한국어 지원</li>
-                    <li>조작 시스템 최적화</li>
-                    <li>릴리즈 노트 확인 기능 추가</li>
-                </ul>
-            </div>
-
-            <div class="release-item">
-                <div class="release-version">v1.1.0 - 그래픽 엔진 업그레이드</div>
-                <ul class="release-list">
-                    <li>Canvas 기반 렌더링 도입</li>
-                    <li>고스트 피스 추가</li>
-                    <li>월 킥(Wall Kick) 로직 개선</li>
                 </ul>
             </div>
 
@@ -332,8 +331,10 @@
 
         canvas.width = COLS * BLOCK_SIZE;
         canvas.height = ROWS * BLOCK_SIZE;
-        nextCanvas.width = 100;
-        nextCanvas.height = 100;
+
+        // 미리보기 캔버스 사이즈 조정 (1개 대형 + 4개 소형)
+        nextCanvas.width = 120;
+        nextCanvas.height = 320;
 
         const COLORS = {
             I: '#00d4ff',
@@ -361,22 +362,20 @@
         let gameRunning = true;
         let gamePaused = false;
         let currentPiece = null;
-        let nextPieceType = null;
+        let nextQueue = [];
         let dropCounter = 0;
         let dropInterval = 1000;
         let lastTime = 0;
 
-        // 키 상태 관리
-        const keys = {};
-        const keyTimers = {
-            left: 0,
-            right: 0,
-            down: 0
-        };
-        let hardDropProcessed = false; // 스페이스바 중복 입력 방지용
+        let consecutiveType = null;
+        let consecutiveCount = 0;
 
-        const DAS = 170; // Delayed Auto Shift (첫 이동 후 대기 시간)
-        const ARR = 50;  // Auto Repeat Rate (연속 이동 간격)
+        const keys = {};
+        const keyTimers = { left: 0, right: 0, down: 0 };
+        let hardDropProcessed = false;
+
+        const DAS = 170;
+        const ARR = 50;
 
         class Piece {
             constructor(type) {
@@ -390,16 +389,13 @@
             rotate() {
                 const oldShape = this.shape;
                 const newShape = Array(this.shape.length).fill().map(() => Array(this.shape.length).fill(0));
-
                 for (let y = 0; y < this.shape.length; ++y) {
                     for (let x = 0; x < this.shape[y].length; ++x) {
                         newShape[x][this.shape.length - 1 - y] = this.shape[y][x];
                     }
                 }
-
                 const originalX = this.x;
                 this.shape = newShape;
-
                 if (this.collision()) {
                     this.x += 1;
                     if (this.collision()) {
@@ -428,36 +424,54 @@
             }
         }
 
-        function getRandomType() {
+        function getValidRandomType() {
             const types = 'IOTSZJL';
-            return types[Math.floor(Math.random() * types.length)];
+            let type;
+            do {
+                type = types[Math.floor(Math.random() * types.length)];
+            } while (type === consecutiveType && consecutiveCount >= 2);
+
+            if (type === consecutiveType) {
+                consecutiveCount++;
+            } else {
+                consecutiveType = type;
+                consecutiveCount = 1;
+            }
+            return type;
+        }
+
+        function initQueue() {
+            nextQueue = [];
+            for (let i = 0; i < 5; i++) {
+                nextQueue.push(getValidRandomType());
+            }
         }
 
         function createPiece() {
-            if (!nextPieceType) nextPieceType = getRandomType();
-            const piece = new Piece(nextPieceType);
-            nextPieceType = getRandomType();
+            if (nextQueue.length === 0) initQueue();
+            const type = nextQueue.shift();
+            nextQueue.push(getValidRandomType());
+
+            const piece = new Piece(type);
             drawNext();
 
-            if (piece.collision()) {
-                gameOver();
-            }
+            if (piece.collision()) gameOver();
             return piece;
         }
 
-        function drawBlock(context, x, y, color, isGhost = false) {
+        function drawBlock(context, x, y, color, size = BLOCK_SIZE, isGhost = false) {
             context.fillStyle = color;
             context.globalAlpha = isGhost ? 0.3 : 1;
-            context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+            context.fillRect(x * size, y * size, size, size);
 
             if (!isGhost) {
                 context.strokeStyle = 'rgba(255,255,255,0.3)';
-                context.strokeRect(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
+                context.strokeRect(x * size + size * 0.1, y * size + size * 0.1, size * 0.8, size * 0.8);
             }
 
             context.strokeStyle = isGhost ? color : '#000';
             context.globalAlpha = isGhost ? 0.5 : 1;
-            context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+            context.strokeRect(x * size, y * size, size, size);
             context.globalAlpha = 1;
         }
 
@@ -481,12 +495,10 @@
 
             if (currentPiece) {
                 let ghostY = 0;
-                while (!currentPiece.collision(0, ghostY + 1)) {
-                    ghostY++;
-                }
+                while (!currentPiece.collision(0, ghostY + 1)) ghostY++;
                 currentPiece.shape.forEach((row, y) => {
                     row.forEach((value, x) => {
-                        if (value) drawBlock(ctx, currentPiece.x + x, currentPiece.y + y + ghostY, currentPiece.color, true);
+                        if (value) drawBlock(ctx, currentPiece.x + x, currentPiece.y + y + ghostY, currentPiece.color, BLOCK_SIZE, true);
                     });
                 });
 
@@ -502,111 +514,93 @@
             nctx.fillStyle = '#000';
             nctx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
 
-            const shape = SHAPES[nextPieceType];
-            const color = COLORS[nextPieceType];
-            const size = 20;
-            const offsetX = (nextCanvas.width - shape[0].length * size) / 2;
-            const offsetY = (nextCanvas.height - shape.length * size) / 2;
+            // 구분선
+            nctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            nctx.beginPath(); nctx.moveTo(10, 110); nctx.lineTo(110, 110); nctx.stroke();
 
-            shape.forEach((row, y) => {
-                row.forEach((value, x) => {
-                    if (value) {
-                        nctx.fillStyle = color;
-                        nctx.fillRect(offsetX + x * size, offsetY + y * size, size, size);
-                        nctx.strokeStyle = '#000';
-                        nctx.strokeRect(offsetX + x * size, offsetY + y * size, size, size);
-                    }
+            nextQueue.forEach((type, index) => {
+                const shape = SHAPES[type];
+                const color = COLORS[type];
+
+                // 첫 번째는 크게, 나머지는 작게
+                const size = index === 0 ? 25 : 14;
+                const containerWidth = 120;
+                const containerHeight = index === 0 ? 110 : 50;
+                const startY = index === 0 ? 0 : 110 + (index - 1) * 50;
+
+                // 정중앙 정렬을 위한 바운딩 박스 계산
+                let minX = 4, maxX = -1, minY = 4, maxY = -1;
+                shape.forEach((row, y) => {
+                    row.forEach((value, x) => {
+                        if (value) {
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
+                        }
+                    });
+                });
+
+                const pieceW = (maxX - minX + 1) * size;
+                const pieceH = (maxY - minY + 1) * size;
+                const offsetX = (containerWidth - pieceW) / 2 - minX * size;
+                const offsetY = startY + (containerHeight - pieceH) / 2 - minY * size;
+
+                shape.forEach((row, y) => {
+                    row.forEach((value, x) => {
+                        if (value) {
+                            nctx.fillStyle = color;
+                            nctx.fillRect(offsetX + x * size, offsetY + y * size, size, size);
+                            nctx.strokeStyle = '#000';
+                            nctx.strokeRect(offsetX + x * size, offsetY + y * size, size, size);
+
+                            // 광택 효과 (메인 블록만)
+                            if (index === 0) {
+                                nctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                                nctx.strokeRect(offsetX + x * size + 2, offsetY + y * size + 2, size - 4, size - 4);
+                            }
+                        }
+                    });
                 });
             });
         }
 
         function handleInput(deltaTime) {
             if (gamePaused || !gameRunning || !currentPiece) return;
-
-            // 좌측 이동
             if (keys['arrowleft']) {
-                if (keyTimers.left === 0) {
-                    moveLeft();
-                    keyTimers.left = DAS;
-                } else {
-                    keyTimers.left -= deltaTime;
-                    if (keyTimers.left <= 0) {
-                        moveLeft();
-                        keyTimers.left = ARR;
-                    }
-                }
-            } else {
-                keyTimers.left = 0;
-            }
+                if (keyTimers.left === 0) { moveLeft(); keyTimers.left = DAS; }
+                else { keyTimers.left -= deltaTime; if (keyTimers.left <= 0) { moveLeft(); keyTimers.left = ARR; } }
+            } else keyTimers.left = 0;
 
-            // 우측 이동
             if (keys['arrowright']) {
-                if (keyTimers.right === 0) {
-                    moveRight();
-                    keyTimers.right = DAS;
-                } else {
-                    keyTimers.right -= deltaTime;
-                    if (keyTimers.right <= 0) {
-                        moveRight();
-                        keyTimers.right = ARR;
-                    }
-                }
-            } else {
-                keyTimers.right = 0;
-            }
+                if (keyTimers.right === 0) { moveRight(); keyTimers.right = DAS; }
+                else { keyTimers.right -= deltaTime; if (keyTimers.right <= 0) { moveRight(); keyTimers.right = ARR; } }
+            } else keyTimers.right = 0;
 
-            // 아래 이동
             if (keys['arrowdown']) {
-                if (keyTimers.down === 0) {
-                    moveDown();
-                    keyTimers.down = ARR;
-                } else {
-                    keyTimers.down -= deltaTime;
-                    if (keyTimers.down <= 0) {
-                        moveDown();
-                        keyTimers.down = ARR;
-                    }
-                }
-            } else {
-                keyTimers.down = 0;
-            }
+                if (keyTimers.down === 0) { moveDown(); keyTimers.down = ARR; }
+                else { keyTimers.down -= deltaTime; if (keyTimers.down <= 0) { moveDown(); keyTimers.down = ARR; } }
+            } else keyTimers.down = 0;
         }
 
-        function moveLeft() {
-            currentPiece.x--;
-            if (currentPiece.collision()) currentPiece.x++;
-            draw();
-        }
-
-        function moveRight() {
-            currentPiece.x++;
-            if (currentPiece.collision()) currentPiece.x--;
-            draw();
-        }
+        function moveLeft() { currentPiece.x--; if (currentPiece.collision()) currentPiece.x++; draw(); }
+        function moveRight() { currentPiece.x++; if (currentPiece.collision()) currentPiece.x--; draw(); }
 
         function update(time = 0) {
             const deltaTime = time - lastTime;
             lastTime = time;
-
             if (!gamePaused && gameRunning) {
                 handleInput(deltaTime);
-
                 dropCounter += deltaTime;
-                if (dropCounter > dropInterval) {
-                    moveDown();
-                }
+                if (dropCounter > dropInterval) moveDown();
                 draw();
             }
-
             requestAnimationFrame(update);
         }
 
         function moveDown() {
             currentPiece.y++;
-            if (currentPiece.collision()) {
-                currentPiece.y--;
-                lockPiece();
-            }
+            if (currentPiece.collision()) { currentPiece.y--; lockPiece(); }
             dropCounter = 0;
         }
 
@@ -619,7 +613,6 @@
                     }
                 });
             });
-
             clearLines();
             currentPiece = createPiece();
         }
@@ -627,18 +620,15 @@
         function clearLines() {
             let linesCleared = 0;
             outer: for (let y = ROWS - 1; y >= 0; y--) {
-                for (let x = 0; x < COLS; x++) {
-                    if (board[y][x] === 0) continue outer;
-                }
-                const row = board.splice(y, 1)[0].fill(0);
-                board.unshift(row);
+                for (let x = 0; x < COLS; x++) { if (board[y][x] === 0) continue outer; }
+                board.splice(y, 1);
+                board.unshift(Array(COLS).fill(0));
                 linesCleared++;
                 y++;
             }
-
             if (linesCleared > 0) {
                 score += [0, 100, 300, 500, 800][linesCleared] * level;
-                level = Math.floor(score / 1000) + 1;
+                level = Math.floor(score / 2000) + 1; // 레벨업 허들 조정
                 dropInterval = Math.max(100, 1000 - (level - 1) * 100);
                 document.getElementById('score').innerText = score.toString().padStart(6, '0');
                 document.getElementById('level').innerText = level;
@@ -646,9 +636,7 @@
         }
 
         function hardDrop() {
-            while (!currentPiece.collision(0, 1)) {
-                currentPiece.y++;
-            }
+            while (!currentPiece.collision(0, 1)) currentPiece.y++;
             lockPiece();
             draw();
         }
@@ -666,67 +654,42 @@
 
         function resetGame() {
             board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-            score = 0;
-            level = 1;
-            dropInterval = 1000;
-            gameRunning = true;
-            gamePaused = false;
+            score = 0; level = 1; dropInterval = 1000;
+            gameRunning = true; gamePaused = false;
             document.getElementById('score').innerText = '000000';
             document.getElementById('level').innerText = '1';
             document.getElementById('gameOverModal').style.display = 'none';
+            consecutiveCount = 0; consecutiveType = null;
+            initQueue();
             currentPiece = createPiece();
             hardDropProcessed = false;
-            keys[' '] = false;
             draw();
         }
 
-        function showReleaseNotes() {
-            document.getElementById('releaseNotesModal').style.display = 'flex';
-        }
-
-        function closeReleaseNotes() {
-            document.getElementById('releaseNotesModal').style.display = 'none';
-        }
+        function showReleaseNotes() { document.getElementById('releaseNotesModal').style.display = 'flex'; }
+        function closeReleaseNotes() { document.getElementById('releaseNotesModal').style.display = 'none'; }
 
         window.addEventListener('keydown', event => {
             const key = event.key.toLowerCase();
             keys[key] = true;
-
             if (!gameRunning) return;
-            if (key === 'p') {
-                togglePause();
-                return;
-            }
-
+            if (key === 'p') { togglePause(); return; }
             if (gamePaused) return;
-
-            if (key === 'w' || key === 'arrowup') {
-                currentPiece.rotate();
+            if (key === 'w' || key === 'arrowup') { currentPiece.rotate(); event.preventDefault(); }
+            else if (key === ' ') {
                 event.preventDefault();
-            } else if (key === ' ') {
-                event.preventDefault();
-                // 스페이스바가 처음 눌린 시점에만 즉시 하강 실행
-                if (!hardDropProcessed) {
-                    hardDrop();
-                    hardDropProcessed = true;
-                }
-            } else if (['arrowleft', 'arrowright', 'arrowdown'].includes(key)) {
-                event.preventDefault();
-            }
-
+                if (!hardDropProcessed) { hardDrop(); hardDropProcessed = true; }
+            } else if (['arrowleft', 'arrowright', 'arrowdown'].includes(key)) event.preventDefault();
             draw();
         });
 
         window.addEventListener('keyup', event => {
             const key = event.key.toLowerCase();
             keys[key] = false;
-
-            // 스페이스바를 떼면 다시 입력 가능하도록 상태 초기화
-            if (key === ' ') {
-                hardDropProcessed = false;
-            }
+            if (key === ' ') hardDropProcessed = false;
         });
 
+        initQueue();
         currentPiece = createPiece();
         update();
     </script>
