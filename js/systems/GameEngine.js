@@ -256,10 +256,28 @@ class GameEngine {
         }
 
         this.score += [0, 100, 300, 500, 800][linesCleared] * this.level;
-        this.level = Math.floor(this.score / 2000) + 1;
+
+        const nextLevel = Math.floor(this.score / 2000) + 1;
+        if (nextLevel > this.level) {
+            this.level = nextLevel;
+            this.showLevelUp(this.level);
+        }
+
         this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 100);
         document.getElementById('score').innerText = this.score.toString().padStart(6, '0');
         document.getElementById('level').innerText = this.level;
+        document.getElementById('dropSpeed').innerHTML = `${this.dropInterval}<span style="font-size: 0.8rem; margin-left: 2px;">ms</span>`;
+    }
+
+    showLevelUp(level) {
+        const overlay = document.getElementById('levelOverlay');
+        if (!overlay) return;
+
+        overlay.innerText = `LEVEL ${level}`;
+        overlay.classList.remove('level-up-animate');
+        // 강제 리플로우를 통해 애니메이션 재시작
+        void overlay.offsetWidth;
+        overlay.classList.add('level-up-animate');
     }
 
     clearLines() {
@@ -312,11 +330,13 @@ class GameEngine {
         this.gameRunning = true; this.gamePaused = false;
         document.getElementById('score').innerText = '000000';
         document.getElementById('level').innerText = '1';
+        document.getElementById('dropSpeed').innerHTML = '1000<span style="font-size: 0.8rem; margin-left: 2px;">ms</span>';
         document.getElementById('gameOverModal').style.display = 'none';
         this.consecutiveCount = 0; this.consecutiveType = null;
         this.initQueue();
         this.currentPiece = this.createPiece();
         this.input.hardDropProcessed = false;
+        this.showLevelUp(1);
         this.draw();
     }
 
@@ -343,6 +363,7 @@ class GameEngine {
     start() {
         this.initQueue();
         this.currentPiece = this.createPiece();
+        this.showLevelUp(1);
         this.update();
     }
 }
