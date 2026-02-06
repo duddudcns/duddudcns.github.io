@@ -13,6 +13,7 @@ class GameEngine {
 
         this.board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
         this.score = 0;
+        this.linesCleared = 0;
         this.level = 1;
         this.gameRunning = true;
         this.gamePaused = false;
@@ -258,8 +259,9 @@ class GameEngine {
         }
 
         this.score += [0, 100, 300, 500, 800][linesCleared] * this.level;
+        this.linesCleared += linesCleared;
 
-        const nextLevel = Math.floor(this.score / 2000) + 1;
+        const nextLevel = Math.floor(this.linesCleared / 10) + 1;
         if (nextLevel > this.level) {
             this.level = nextLevel;
             this.showLevelUp(this.level);
@@ -341,7 +343,7 @@ class GameEngine {
 
     resetGame() {
         this.board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-        this.score = 0; this.level = 1; this.dropInterval = 1000;
+        this.score = 0; this.linesCleared = 0; this.level = 1; this.dropInterval = 1000;
         this.gameRunning = true; this.gamePaused = false;
         document.getElementById('score').innerText = '000000';
         document.getElementById('level').innerText = '1';

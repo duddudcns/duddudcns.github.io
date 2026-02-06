@@ -1,0 +1,54 @@
+.runrun-layout {
+    grid-template-columns: auto 220px !important;
+}
+
+#gameCanvas {
+    background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 70%, #90EE90 70%, #556B2F 100%);
+    cursor: pointer;
+}
+
+.fever-bar-container {
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.hp-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #ff0055, #ff66aa);
+    transition: width 0.3s ease-out;
+}
+
+/* 특유의 명랑한 색감을 위해 테두리 오버라이드 */
+.board-container {
+    border-color: #ff007f !important;
+    box-shadow: 0 0 25px rgba(255, 0, 127, 0.3) !important;
+}
+
+/* 배경 구름 애니메이션 등을 위한 레이어 설정 */
+.board-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50"><circle cx="20" cy="20" r="10" fill="white" opacity="0.4"/><circle cx="35" cy="25" r="12" fill="white" opacity="0.4"/><circle cx="50" cy="20" r="10" fill="white" opacity="0.4"/></svg>');
+    background-size: 200px 100px;
+    animation: moveClouds 20s linear infinite;
+}
+
+@keyframes moveClouds {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 400px 0;
+    }
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>달려달려 - 미니게임천국</title>
+    <link rel="stylesheet" href="css/games/runrun.css">
+    <link rel="stylesheet" href="css/styles.css"> <!-- Reusing some base styles -->
+</head>
+
+<body>
+    <div class="game-wrapper">
+        <div class="game-header">
+            <h1>달려달려 <span class="version-badge">CLASSIC</span></h1>
+        </div>
+
+        <div class="game-content runrun-layout">
+            <div class="board-container">
+                <canvas id="gameCanvas"></canvas>
+                <div id="statusOverlay" class="level-overlay">READY?</div>
+            </div>
+
+            <div class="sidebar sidebar-stats">
+                <div class="panel">
+                    <div class="panel-label">현재 점수</div>
+                    <div id="score" class="stat-value">000000</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-label">피버 게이지</div>
+                    <div class="fever-bar-container">
+                        <div id="hpBar" class="hp-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="button-group">
+                        <button onclick="location.href='index.html'" style="background: #ff006e; color: white;">🏠
+                            홈으로</button>
+                        <button onclick="window.game.resetGame()">재시작</button>
+                    </div>
+                </div>
+
+                <div class="panel controls-info">
+                    <div class="panel-label">조작방법</div>
+                    <div>아무 키나 클릭 : 점프</div>
+                    <div>(공중에서 한 번 더 가능)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 게임 오버 모달 -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content game-over-content">
+            <div class="game-over-icon">🏃</div>
+            <h2>기록 달성!</h2>
+            <div class="final-stats">
+                <div class="stat-group">
+                    <span class="stat-label">최종 점수</span>
+                    <span id="finalScore" class="stat-value">000000</span>
+                </div>
+            </div>
+            <button class="primary-btn" onclick="window.game.resetGame()">다시 달리기</button>
+        </div>
+    </div>
+
+    <script src="js/games/runrun/RunRunEngine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('gameCanvas');
+            window.game = new RunRunEngine(canvas);
+            window.game.start();
+        });
+    </script>
+</body>
+
+</html>

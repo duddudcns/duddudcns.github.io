@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>놓아놓아 - 미니게임천국2</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/games/noahnohah.css">
+</head>
+
+<body>
+    <div class="game-wrapper">
+        <div class="game-header">
+            <h1>놓아놓아 <span class="version-badge">SWING</span></h1>
+        </div>
+
+        <div class="game-content swing-layout">
+            <div class="board-container">
+                <canvas id="gameCanvas"></canvas>
+                <div id="statusOverlay" class="level-overlay">TOUCH TO START</div>
+            </div>
+
+            <div class="sidebar sidebar-stats">
+                <div class="panel">
+                    <div class="panel-label">거리</div>
+                    <div id="score" class="stat-value">0<span style="font-size: 0.8rem;">m</span></div>
+                </div>
+
+                <div class="panel">
+                    <div class="button-group">
+                        <button onclick="location.href='index.html'" style="background: #ff006e; color: white;">🏠
+                            홈으로</button>
+                        <button onclick="window.game.resetGame()">재시작</button>
+                    </div>
+                </div>
+
+                <div class="panel controls-info">
+                    <div class="panel-label">조작방법</div>
+                    <div>클릭: 줄 쏘기/놓기</div>
+                    <div>타이밍 맞춰 스윙!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content game-over-content">
+            <div class="game-over-icon">🐒</div>
+            <h2>추락!</h2>
+            <div class="final-stats">
+                <div class="stat-group">
+                    <span class="stat-label">최종 거리</span>
+                    <span id="finalScore" class="stat-value">0m</span>
+                </div>
+            </div>
+            <button class="primary-btn" onclick="window.game.resetGame()">다시 스윙</button>
+        </div>
+    </div>
+
+    <script src="js/games/noahnohah/SwingEngine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('gameCanvas');
+            window.game = new SwingEngine(canvas);
+            window.game.start();
+        });
+    </script>
+</body>
+
+</html>
