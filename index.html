@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.3.16</title>
+    <title>테트리스 게임 - v1.3.17</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.16</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.17</span></h1>
         </div>
 
         <div class="game-content">
@@ -21,7 +21,7 @@
             </div>
 
             <div class="sidebar sidebar-next">
-                <div class="panel" style="text-align: center; height: 100%; display: flex; flex-direction: column;">
+                <div class="panel" style="text-align: center; display: flex; flex-direction: column;">
                     <div class="panel-label">다음 블록들</div>
                     <div class="next-preview-container">
                         <canvas id="nextCanvas"></canvas>
@@ -95,6 +95,14 @@
                 <h2>🚀 릴리즈 노트</h2>
             </div>
             <div class="release-scroll-area">
+                <div class="release-item">
+                    <div class="release-version">v1.3.17 - 레이아웃 및 모달 최종 정밀 조정</div>
+                    <ul class="release-list">
+                        <li>다음 블록(Next) 패널의 테두리가 내용물 크기에 비정상적으로 맞춰지던 현상 최종 수정</li>
+                        <li>릴리즈 노트 하단 닫기 버튼을 스크롤 영역에서 완전히 분리하여 고정</li>
+                    </ul>
+                </div>
+
                 <div class="release-item">
                     <div class="release-version">v1.3.16 - 레이아웃 안정화 및 모달 개선</div>
                     <ul class="release-list">
@@ -236,17 +244,17 @@
                         <li>다음 블록 미리보기 확장 (총 5개 표시)</li>
                     </ul>
                 </div>
-
-                <button class="close-btn" onclick="closeReleaseNotes()">닫기</button>
             </div>
+            <button class="close-btn" onclick="closeReleaseNotes()">닫기</button>
         </div>
+    </div>
 
-        <!-- Scripts -->
-        <script src="js/constants.js" defer></script>
-        <script src="js/models/Piece.js" defer></script>
-        <script src="js/systems/InputHandler.js" defer></script>
-        <script src="js/systems/GameEngine.js" defer></script>
-        <script src="js/main.js" defer></script>
+    <!-- Scripts -->
+    <script src="js/constants.js" defer></script>
+    <script src="js/models/Piece.js" defer></script>
+    <script src="js/systems/InputHandler.js" defer></script>
+    <script src="js/systems/GameEngine.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 
 </html>
