@@ -27,8 +27,7 @@ class GameEngine {
         // 효과 관련 상태
         this.flashLines = []; // 지워질 줄 인덱스
         this.flashTimer = 0;
-        this.landingEffect = { active: false, x: 0, y: 0, timer: 0 };
-        this.shakeTimer = 0;
+        this.dropTrail = { active: false, x: 0, yStart: 0, yEnd: 0, timer: 0, shape: null, color: null };
 
         // InputHandler를 가장 마지막에 초기화하여 this가 안정적으로 넘어가도록 함
         this.input = new InputHandler(this);
@@ -127,11 +126,23 @@ class GameEngine {
             });
         }
 
-        // 착지 효과
-        if (this.landingEffect.active) {
-            const opacity = this.landingEffect.timer / 150;
-            this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.5})`;
-            this.ctx.fillRect(0, this.landingEffect.y * BLOCK_SIZE, this.canvas.width, BLOCK_SIZE * 0.5);
+        // 수직 강하 잔상 효과 (Drop Trail)
+        if (this.dropTrail.active) {
+            const opacity = this.dropTrail.timer / 150;
+            this.ctx.globalAlpha = opacity * 0.4;
+            this.ctx.fillStyle = this.dropTrail.color;
+
+            // 경로를 따라 잔상 그리기
+            for (let y = this.dropTrail.yStart; y < this.dropTrail.yEnd; y++) {
+                this.dropTrail.shape.forEach((row, py) => {
+                    row.forEach((value, px) => {
+                        if (value) {
+                            this.ctx.fillRect((this.dropTrail.x + px) * BLOCK_SIZE, (y + py) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        }
+                    });
+                });
+            }
+            this.ctx.globalAlpha = 1;
         }
     }
 
@@ -204,13 +215,6 @@ class GameEngine {
             });
         });
 
-        // 착지 효과 활성화
-        this.landingEffect = {
-            active: true,
-            y: this.currentPiece.y + this.currentPiece.shape.length - 1,
-            timer: 150
-        };
-
         const linesToClear = [];
         for (let y = ROWS - 1; y >= 0; y--) {
             if (this.board[y].every(cell => cell !== 0)) {
@@ -253,21 +257,24 @@ class GameEngine {
 
     hardDrop() {
         if (!this.currentPiece) return;
-        while (!this.currentPiece.collision(this.board, 0, 1)) this.currentPiece.y++;
 
-        // 화면 흔들림 효과 트리거
-        this.triggerShake();
+        const startY = this.currentPiece.y;
+        while (!this.currentPiece.collision(this.board, 0, 1)) this.currentPiece.y++;
+        const endY = this.currentPiece.y;
+
+        // 하강 잔상 효과 트리거
+        this.dropTrail = {
+            active: true,
+            x: this.currentPiece.x,
+            yStart: startY,
+            yEnd: endY,
+            timer: 150,
+            shape: this.currentPiece.shape,
+            color: this.currentPiece.color
+        };
 
         this.lockPiece();
         this.draw();
-    }
-
-    triggerShake() {
-        const wrapper = document.querySelector('.game-wrapper');
-        wrapper.classList.remove('shake');
-        void wrapper.offsetWidth; // 리플로우 강제
-        wrapper.classList.add('shake');
-        setTimeout(() => wrapper.classList.remove('shake'), 150);
     }
 
     togglePause() {
@@ -301,9 +308,9 @@ class GameEngine {
 
         // 효과 타이머 업데이트
         if (this.flashTimer > 0) this.flashTimer -= deltaTime;
-        if (this.landingEffect.active) {
-            this.landingEffect.timer -= deltaTime;
-            if (this.landingEffect.timer <= 0) this.landingEffect.active = false;
+        if (this.dropTrail.active) {
+            this.dropTrail.timer -= deltaTime;
+            if (this.dropTrail.timer <= 0) this.dropTrail.active = false;
         }
 
         if (!this.gamePaused && this.gameRunning) {
