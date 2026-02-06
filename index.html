@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.3.2</title>
+    <title>테트리스 게임 - v1.3.3</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.2</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.3</span></h1>
         </div>
 
         <div class="game-content">
@@ -19,7 +19,7 @@
                 <canvas id="gameCanvas"></canvas>
             </div>
 
-            <div class="sidebar">
+            <div class="sidebar sidebar-stats">
                 <div class="panel">
                     <div class="panel-label">점수</div>
                     <div id="score" class="stat-value">000000</div>
@@ -28,13 +28,6 @@
                 <div class="panel">
                     <div class="panel-label">레벨</div>
                     <div id="level" class="stat-value">1</div>
-                </div>
-
-                <div class="panel" style="text-align: center;">
-                    <div class="panel-label">다음 블록들</div>
-                    <div class="next-preview-container">
-                        <canvas id="nextCanvas"></canvas>
-                    </div>
                 </div>
 
                 <div class="panel">
@@ -46,10 +39,19 @@
 
                 <div class="panel controls-info">
                     <div class="panel-label">조작방법</div>
-                    <div>방향키 : 이동 및 하강</div>
+                    <div>방향키 : 이동 / 하강</div>
                     <div>W / ↑ : 회전</div>
                     <div>Space : 즉시 하강</div>
                     <div>P : 일시정지</div>
+                </div>
+            </div>
+
+            <div class="sidebar sidebar-next">
+                <div class="panel" style="text-align: center; height: 100%; display: flex; flex-direction: column;">
+                    <div class="panel-label">다음 블록들</div>
+                    <div class="next-preview-container">
+                        <canvas id="nextCanvas"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,6 +70,14 @@
     <div id="releaseNotesModal" class="modal">
         <div class="modal-content">
             <h2>🚀 릴리즈 노트</h2>
+
+            <div class="release-item">
+                <div class="release-version">v1.3.3 - 3단 컬럼 레이아웃 적용</div>
+                <ul class="release-list">
+                    <li>화면 세로 늘어짐 방지를 위해 3단 컬럼 구조로 개편</li>
+                    <li>UI 요소 재배치 및 가독성 개선</li>
+                </ul>
+            </div>
 
             <div class="release-item">
                 <div class="release-version">v1.3.2 - 레이아웃 및 캔버스 크기 수정</div>
