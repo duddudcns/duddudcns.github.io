@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.1.0</title>
+    <title>테트리스 게임 - v1.2.0</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             display: flex;
             justify-content: center;
@@ -54,6 +54,7 @@
             font-weight: 800;
             vertical-align: middle;
             margin-left: 10px;
+            cursor: pointer;
         }
 
         .game-content {
@@ -150,8 +151,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -159,22 +160,66 @@
 
         .modal-content {
             background: #1a1a2e;
-            padding: 40px;
+            padding: 30px;
             border-radius: 12px;
-            border: 2px solid #ff006e;
-            text-align: center;
-            box-shadow: 0 0 40px rgba(255, 0, 110, 0.3);
+            border: 2px solid #00d4ff;
+            text-align: left;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
+            max-width: 500px;
+            width: 90%;
+            color: #ddd;
         }
 
         .modal-content h2 {
-            color: #ff006e;
-            font-size: 2.5rem;
+            color: #00d4ff;
+            font-size: 1.8rem;
             margin-bottom: 20px;
+            text-align: center;
         }
 
-        .modal-content p {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
+        .release-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .release-version {
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .release-list {
+            list-style: none;
+            padding-left: 10px;
+        }
+
+        .release-list li {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .release-list li::before {
+            content: "✓ ";
+            color: #00ff00;
+        }
+
+        .close-btn {
+            background: #ff006e;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+        }
+
+        #gameOverModal .modal-content {
+            border-color: #ff006e;
+            text-align: center;
+        }
+
+        #gameOverModal h2 {
+            color: #ff006e;
         }
     </style>
 </head>
@@ -182,7 +227,7 @@
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge">v1.1.0</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.0</span></h1>
         </div>
 
         <div class="game-content">
@@ -192,43 +237,79 @@
 
             <div class="sidebar">
                 <div class="panel">
-                    <div class="panel-label">Score</div>
+                    <div class="panel-label">점수</div>
                     <div id="score" class="stat-value">000000</div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-label">Level</div>
+                    <div class="panel-label">레벨</div>
                     <div id="level" class="stat-value">1</div>
                 </div>
 
                 <div class="panel" style="text-align: center;">
-                    <div class="panel-label">Next</div>
+                    <div class="panel-label">다음 블록</div>
                     <canvas id="nextCanvas" class="next-preview"></canvas>
                 </div>
 
                 <div class="panel">
                     <div class="button-group">
-                        <button onclick="togglePause()" id="pauseBtn">Pause</button>
-                        <button onclick="resetGame()">Reset</button>
+                        <button onclick="togglePause()" id="pauseBtn">일시정지</button>
+                        <button onclick="resetGame()">재시작</button>
                     </div>
                 </div>
 
                 <div class="panel controls-info">
-                    <div class="panel-label">Controls</div>
-                    <div>Arrows : Move / Drop</div>
-                    <div>W / Up : Rotate</div>
-                    <div>Space : Hard Drop</div>
-                    <div>P : Pause</div>
+                    <div class="panel-label">조작방법</div>
+                    <div>방향키 : 이동 및 하강</div>
+                    <div>W / ↑ : 회전</div>
+                    <div>Space : 즉시 하강</div>
+                    <div>P : 일시정지</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- 게임 오버 모달 -->
     <div id="gameOverModal" class="modal">
         <div class="modal-content">
-            <h2>GAME OVER</h2>
-            <p>Score: <span id="finalScore">0</span></p>
-            <button onclick="resetGame()">Play Again</button>
+            <h2>게임 오버</h2>
+            <p>최종 점수: <span id="finalScore">0</span></p>
+            <button onclick="resetGame()">다시 도전</button>
+        </div>
+    </div>
+
+    <!-- 릴리즈 노트 모달 -->
+    <div id="releaseNotesModal" class="modal">
+        <div class="modal-content">
+            <h2>🚀 릴리즈 노트</h2>
+
+            <div class="release-item">
+                <div class="release-version">v1.2.0 - 편의성 및 조작 개선</div>
+                <ul class="release-list">
+                    <li>전체 UI 한국어 지원</li>
+                    <li>조작 시스템 최적화 (이동과 회전 동시 처리)</li>
+                    <li>릴리즈 노트 확인 기능 추가</li>
+                </ul>
+            </div>
+
+            <div class="release-item">
+                <div class="release-version">v1.1.0 - 그래픽 엔진 업그레이드</div>
+                <ul class="release-list">
+                    <li>Canvas 기반 렌더링 도입 (부드러운 화면)</li>
+                    <li>고스트 피스 추가</li>
+                    <li>월 킥(Wall Kick) 로직 개선</li>
+                </ul>
+            </div>
+
+            <div class="release-item">
+                <div class="release-version">v1.0.0 - 초기 릴리즈</div>
+                <ul class="release-list">
+                    <li>기본 테트리스 게임플레이 구현</li>
+                    <li>모던 다크 테마 적용</li>
+                </ul>
+            </div>
+
+            <button class="close-btn" onclick="closeReleaseNotes()">닫기</button>
         </div>
     </div>
 
@@ -278,6 +359,9 @@
         let dropInterval = 1000;
         let lastTime = 0;
 
+        // 키 상태 관리 (연속 동작 및 동시 입력 대응)
+        const keysState = {};
+
         class Piece {
             constructor(type) {
                 this.type = type;
@@ -297,12 +381,10 @@
                     }
                 }
 
-                // Wall Kicks (simple version)
                 const originalX = this.x;
                 this.shape = newShape;
 
                 if (this.collision()) {
-                    // Try moving left, then right
                     this.x += 1;
                     if (this.collision()) {
                         this.x -= 2;
@@ -353,7 +435,6 @@
             context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
             if (!isGhost) {
-                // Highlights
                 context.strokeStyle = 'rgba(255,255,255,0.3)';
                 context.strokeRect(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
             }
@@ -365,11 +446,9 @@
         }
 
         function draw() {
-            // Clear board
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw grid
             ctx.strokeStyle = '#111';
             for (let i = 0; i <= COLS; i++) {
                 ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, canvas.height); ctx.stroke();
@@ -378,7 +457,6 @@
                 ctx.beginPath(); ctx.moveTo(0, i * BLOCK_SIZE); ctx.lineTo(canvas.width, i * BLOCK_SIZE); ctx.stroke();
             }
 
-            // Draw board
             board.forEach((row, y) => {
                 row.forEach((value, x) => {
                     if (value) drawBlock(ctx, x, y, COLORS[value]);
@@ -386,7 +464,6 @@
             });
 
             if (currentPiece) {
-                // Draw Ghost
                 let ghostY = 0;
                 while (!currentPiece.collision(0, ghostY + 1)) {
                     ghostY++;
@@ -397,7 +474,6 @@
                     });
                 });
 
-                // Draw Current Piece
                 currentPiece.shape.forEach((row, y) => {
                     row.forEach((value, x) => {
                         if (value) drawBlock(ctx, currentPiece.x + x, currentPiece.y + y, currentPiece.color);
@@ -495,11 +571,12 @@
                 currentPiece.y++;
             }
             lockPiece();
+            draw();
         }
 
         function togglePause() {
             gamePaused = !gamePaused;
-            document.getElementById('pauseBtn').innerText = gamePaused ? 'Resume' : 'Pause';
+            document.getElementById('pauseBtn').innerText = gamePaused ? '재개하기' : '일시정지';
         }
 
         function gameOver() {
@@ -522,31 +599,50 @@
             draw();
         }
 
+        function showReleaseNotes() {
+            document.getElementById('releaseNotesModal').style.display = 'flex';
+        }
+
+        function closeReleaseNotes() {
+            document.getElementById('releaseNotesModal').style.display = 'none';
+        }
+
+        // 키보드 입력을 더 독립적으로 처리하여 간섭 최소화
         window.addEventListener('keydown', event => {
             if (!gameRunning) return;
-            if (event.key.toLowerCase() === 'p') togglePause();
+
+            const key = event.key.toLowerCase();
+
+            // 일시정지 단축키 (간섭 없음)
+            if (key === 'p') {
+                togglePause();
+                return;
+            }
+
             if (gamePaused) return;
 
-            switch (event.keyCode) {
-                case 37: // Left
-                    currentPiece.x--;
-                    if (currentPiece.collision()) currentPiece.x++;
-                    break;
-                case 39: // Right
-                    currentPiece.x++;
-                    if (currentPiece.collision()) currentPiece.x--;
-                    break;
-                case 40: // Down
-                    moveDown();
-                    break;
-                case 38: // Up
-                case 87: // W
-                    currentPiece.rotate();
-                    break;
-                case 32: // Space
-                    hardDrop();
-                    break;
+            // 회전은 keydown 즉시 1회 실행
+            if (key === 'w' || event.keyCode === 38) {
+                currentPiece.rotate();
+                event.preventDefault();
             }
+            // 이동 및 기타 조작
+            else if (event.keyCode === 37) { // Left
+                currentPiece.x--;
+                if (currentPiece.collision()) currentPiece.x++;
+                event.preventDefault();
+            } else if (event.keyCode === 39) { // Right
+                currentPiece.x++;
+                if (currentPiece.collision()) currentPiece.x--;
+                event.preventDefault();
+            } else if (event.keyCode === 40) { // Down
+                moveDown();
+                event.preventDefault();
+            } else if (event.keyCode === 32) { // Space
+                hardDrop();
+                event.preventDefault();
+            }
+
             draw();
         });
 
