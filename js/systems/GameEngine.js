@@ -126,24 +126,26 @@ class GameEngine {
             });
         }
 
-        // 수직 강하 속도선 효과 (Speed Streak - Gradient Pillars)
+        // 수직 강하 속도선 효과 (Speed Streak - 10% Localized)
         if (this.dropTrail.active) {
             const opacityBase = this.dropTrail.timer / 150;
+            const totalDist = this.dropTrail.yEnd - this.dropTrail.yStart;
+            // 이동 거리의 마지막 10%만 잔상으로 표시 (최소 1칸 이상 확보)
+            const streakHeight = Math.max(1, totalDist * 0.1);
+            const trailYStart = (this.dropTrail.yEnd - streakHeight) * BLOCK_SIZE;
 
             this.dropTrail.shape.forEach((row, py) => {
                 row.forEach((value, px) => {
                     if (value) {
                         const x = (this.dropTrail.x + px) * BLOCK_SIZE;
-                        const yStart = this.dropTrail.yStart * BLOCK_SIZE;
                         const yEnd = (this.dropTrail.yEnd + py) * BLOCK_SIZE;
 
-                        const gradient = this.ctx.createLinearGradient(x, yStart, x, yEnd);
+                        const gradient = this.ctx.createLinearGradient(x, trailYStart, x, yEnd);
                         gradient.addColorStop(0, 'transparent');
                         gradient.addColorStop(1, `${this.dropTrail.color}${Math.floor(opacityBase * 0.4 * 255).toString(16).padStart(2, '0')}`);
 
                         this.ctx.fillStyle = gradient;
-                        // 기둥 형태로 길게 그리기
-                        this.ctx.fillRect(x, yStart, BLOCK_SIZE, yEnd - yStart);
+                        this.ctx.fillRect(x, trailYStart, BLOCK_SIZE, yEnd - trailYStart);
                     }
                 });
             });
@@ -229,6 +231,9 @@ class GameEngine {
         if (linesToClear.length > 0) {
             this.flashLines = linesToClear;
             this.flashTimer = 150; // 150ms 동안 반짝임
+
+            // 라인 삭제 시 잔상 효과 강제 종료 (보드 밀림 시 위치 오류 방지)
+            this.dropTrail.active = false;
 
             // 보드 상태는 즉시 업데이트
             this.executeClearLines(linesToClear.length);

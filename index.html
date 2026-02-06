@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.3.10</title>
+    <title>테트리스 게임 - v1.3.12</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.10</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.12</span></h1>
         </div>
 
         <div class="game-content">
@@ -70,6 +70,22 @@
     <div id="releaseNotesModal" class="modal">
         <div class="modal-content">
             <h2>🚀 릴리즈 노트</h2>
+
+            <div class="release-item">
+                <div class="release-version">v1.3.12 - 잔상 연출 격리 및 오류 수정</div>
+                <ul class="release-list">
+                    <li>라인 삭제 시 잔상이 남아있던 현상 수정</li>
+                    <li>잔상 효과가 하드 드롭(Space) 시에만 작동하도록 철저히 격리</li>
+                </ul>
+            </div>
+
+            <div class="release-item">
+                <div class="release-version">v1.3.11 - 잔상 연출 정밀화 (10% 제한)</div>
+                <ul class="release-list">
+                    <li>하드 드롭 잔상 길이를 하강 거리의 마지막 10%로 제한</li>
+                    <li>착지 순간의 번쩍이는 임팩트 집중도 향상</li>
+                </ul>
+            </div>
 
             <div class="release-item">
                 <div class="release-version">v1.3.10 - 하강 속도감 연출 강화</div>
