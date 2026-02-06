@@ -27,7 +27,7 @@ class GameEngine {
         // 효과 관련 상태
         this.flashLines = []; // 지워질 줄 인덱스
         this.flashTimer = 0;
-        this.dropTrail = { active: false, x: 0, yStart: 0, yEnd: 0, timer: 0, shape: null, color: null };
+        this.dropTrail = { active: false, x: 0, yStart: 0, yEnd: 0, timer: 0 };
 
         // InputHandler를 가장 마지막에 초기화하여 this가 안정적으로 넘어가도록 함
         this.input = new InputHandler(this);
@@ -129,20 +129,16 @@ class GameEngine {
         // 수직 강하 잔상 효과 (Drop Trail)
         if (this.dropTrail.active) {
             const opacity = this.dropTrail.timer / 150;
-            this.ctx.globalAlpha = opacity * 0.4;
-            this.ctx.fillStyle = this.dropTrail.color;
-
-            // 경로를 따라 잔상 그리기
-            for (let y = this.dropTrail.yStart; y < this.dropTrail.yEnd; y++) {
-                this.dropTrail.shape.forEach((row, py) => {
-                    row.forEach((value, px) => {
-                        if (value) {
-                            this.ctx.fillRect((this.dropTrail.x + px) * BLOCK_SIZE, (y + py) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                        }
-                    });
-                });
-            }
-            this.ctx.globalAlpha = 1;
+            this.ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.3})`;
+            this.ctx.lineWidth = 4;
+            this.ctx.beginPath();
+            const centerX = (this.dropTrail.x + COLS_IN_PIECE / 2) * BLOCK_SIZE; // 대략적인 중앙
+            // 실제 조각의 x 범위 중앙 계산 (더 정확하게)
+            const xOffset = 2 * BLOCK_SIZE; // 블록 4칸 중 중앙
+            this.ctx.moveTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yStart * BLOCK_SIZE);
+            this.ctx.lineTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yEnd * BLOCK_SIZE + 40); // 40은 대략적인 조각 높이
+            this.ctx.stroke();
+            this.ctx.lineWidth = 1;
         }
     }
 
@@ -224,13 +220,15 @@ class GameEngine {
 
         if (linesToClear.length > 0) {
             this.flashLines = linesToClear;
-            this.flashTimer = 200; // 200ms 동안 반짝임
+            this.flashTimer = 150; // 150ms 동안 반짝임
 
-            // 효과 종료 후 실제 라인 삭제
+            // 보드 상태는 즉시 업데이트
+            this.executeClearLines(linesToClear.length);
+
+            // 효과 타이머 종료 후 flashLines 초기화
             setTimeout(() => {
-                this.executeClearLines(linesToClear.length);
                 this.flashLines = [];
-            }, 200);
+            }, 150);
         }
 
         this.currentPiece = this.createPiece();
@@ -268,9 +266,7 @@ class GameEngine {
             x: this.currentPiece.x,
             yStart: startY,
             yEnd: endY,
-            timer: 150,
-            shape: this.currentPiece.shape,
-            color: this.currentPiece.color
+            timer: 150
         };
 
         this.lockPiece();
