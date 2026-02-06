@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.2.0</title>
+    <title>테트리스 게임 - v1.2.1</title>
     <style>
         * {
             margin: 0;
@@ -227,7 +227,7 @@
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.0</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.1</span></h1>
         </div>
 
         <div class="game-content">
@@ -284,10 +284,18 @@
             <h2>🚀 릴리즈 노트</h2>
 
             <div class="release-item">
+                <div class="release-version">v1.2.1 - 조작 간섭 수정</div>
+                <ul class="release-list">
+                    <li>좌우 이동 중 회전 시 이동이 멈추는 현상 수정</li>
+                    <li>상태 기반 입력 시스템 도입으로 동시 조작 최적화</li>
+                </ul>
+            </div>
+
+            <div class="release-item">
                 <div class="release-version">v1.2.0 - 편의성 및 조작 개선</div>
                 <ul class="release-list">
                     <li>전체 UI 한국어 지원</li>
-                    <li>조작 시스템 최적화 (이동과 회전 동시 처리)</li>
+                    <li>조작 시스템 최적화</li>
                     <li>릴리즈 노트 확인 기능 추가</li>
                 </ul>
             </div>
@@ -295,17 +303,9 @@
             <div class="release-item">
                 <div class="release-version">v1.1.0 - 그래픽 엔진 업그레이드</div>
                 <ul class="release-list">
-                    <li>Canvas 기반 렌더링 도입 (부드러운 화면)</li>
+                    <li>Canvas 기반 렌더링 도입</li>
                     <li>고스트 피스 추가</li>
                     <li>월 킥(Wall Kick) 로직 개선</li>
-                </ul>
-            </div>
-
-            <div class="release-item">
-                <div class="release-version">v1.0.0 - 초기 릴리즈</div>
-                <ul class="release-list">
-                    <li>기본 테트리스 게임플레이 구현</li>
-                    <li>모던 다크 테마 적용</li>
                 </ul>
             </div>
 
@@ -359,8 +359,15 @@
         let dropInterval = 1000;
         let lastTime = 0;
 
-        // 키 상태 관리 (연속 동작 및 동시 입력 대응)
-        const keysState = {};
+        // 키 상태 관리
+        const keys = {};
+        const keyTimers = {
+            left: 0,
+            right: 0,
+            down: 0
+        };
+        const DAS = 170; // Delayed Auto Shift (첫 이동 후 대기 시간)
+        const ARR = 50;  // Auto Repeat Rate (연속 이동 간격)
 
         class Piece {
             constructor(type) {
@@ -504,21 +511,84 @@
             });
         }
 
-        function update(time = 0) {
-            if (gamePaused || !gameRunning) {
-                requestAnimationFrame(update);
-                return;
+        function handleInput(deltaTime) {
+            if (gamePaused || !gameRunning || !currentPiece) return;
+
+            // 좌측 이동
+            if (keys['arrowleft']) {
+                if (keyTimers.left === 0) {
+                    moveLeft();
+                    keyTimers.left = DAS;
+                } else {
+                    keyTimers.left -= deltaTime;
+                    if (keyTimers.left <= 0) {
+                        moveLeft();
+                        keyTimers.left = ARR;
+                    }
+                }
+            } else {
+                keyTimers.left = 0;
             }
 
+            // 우측 이동
+            if (keys['arrowright']) {
+                if (keyTimers.right === 0) {
+                    moveRight();
+                    keyTimers.right = DAS;
+                } else {
+                    keyTimers.right -= deltaTime;
+                    if (keyTimers.right <= 0) {
+                        moveRight();
+                        keyTimers.right = ARR;
+                    }
+                }
+            } else {
+                keyTimers.right = 0;
+            }
+
+            // 아래 이동
+            if (keys['arrowdown']) {
+                if (keyTimers.down === 0) {
+                    moveDown();
+                    keyTimers.down = ARR; // 소프트 드랍은 DAS 없이 바로 반복
+                } else {
+                    keyTimers.down -= deltaTime;
+                    if (keyTimers.down <= 0) {
+                        moveDown();
+                        keyTimers.down = ARR;
+                    }
+                }
+            } else {
+                keyTimers.down = 0;
+            }
+        }
+
+        function moveLeft() {
+            currentPiece.x--;
+            if (currentPiece.collision()) currentPiece.x++;
+            draw();
+        }
+
+        function moveRight() {
+            currentPiece.x++;
+            if (currentPiece.collision()) currentPiece.x--;
+            draw();
+        }
+
+        function update(time = 0) {
             const deltaTime = time - lastTime;
             lastTime = time;
-            dropCounter += deltaTime;
 
-            if (dropCounter > dropInterval) {
-                moveDown();
+            if (!gamePaused && gameRunning) {
+                handleInput(deltaTime);
+
+                dropCounter += deltaTime;
+                if (dropCounter > dropInterval) {
+                    moveDown();
+                }
+                draw();
             }
 
-            draw();
             requestAnimationFrame(update);
         }
 
@@ -607,13 +677,11 @@
             document.getElementById('releaseNotesModal').style.display = 'none';
         }
 
-        // 키보드 입력을 더 독립적으로 처리하여 간섭 최소화
         window.addEventListener('keydown', event => {
-            if (!gameRunning) return;
-
             const key = event.key.toLowerCase();
+            keys[key] = true;
 
-            // 일시정지 단축키 (간섭 없음)
+            if (!gameRunning) return;
             if (key === 'p') {
                 togglePause();
                 return;
@@ -621,29 +689,23 @@
 
             if (gamePaused) return;
 
-            // 회전은 keydown 즉시 1회 실행
-            if (key === 'w' || event.keyCode === 38) {
+            // 회전은 keydown 1회성 동작 (연속 동작 방지)
+            if (key === 'w' || key === 'arrowup') {
                 currentPiece.rotate();
                 event.preventDefault();
-            }
-            // 이동 및 기타 조작
-            else if (event.keyCode === 37) { // Left
-                currentPiece.x--;
-                if (currentPiece.collision()) currentPiece.x++;
-                event.preventDefault();
-            } else if (event.keyCode === 39) { // Right
-                currentPiece.x++;
-                if (currentPiece.collision()) currentPiece.x--;
-                event.preventDefault();
-            } else if (event.keyCode === 40) { // Down
-                moveDown();
-                event.preventDefault();
-            } else if (event.keyCode === 32) { // Space
+            } else if (key === ' ') {
                 hardDrop();
+                event.preventDefault();
+            } else if (['arrowleft', 'arrowright', 'arrowdown'].includes(key)) {
                 event.preventDefault();
             }
 
             draw();
+        });
+
+        window.addEventListener('keyup', event => {
+            const key = event.key.toLowerCase();
+            keys[key] = false;
         });
 
         currentPiece = createPiece();
