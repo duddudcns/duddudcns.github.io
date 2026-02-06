@@ -126,26 +126,27 @@ class GameEngine {
             });
         }
 
-        // 수직 강하 잔상 효과 (Drop Trail - Localized Afterimage)
+        // 수직 강하 속도선 효과 (Speed Streak - Gradient Pillars)
         if (this.dropTrail.active) {
             const opacityBase = this.dropTrail.timer / 150;
 
-            // 착지 지점 기준 위쪽으로 2칸 정도만 잔상 표시
-            const startY = Math.max(this.dropTrail.yStart, this.dropTrail.yEnd - 2);
-            for (let y = startY; y < this.dropTrail.yEnd; y++) {
-                const ratio = (y - startY) / (this.dropTrail.yEnd - startY || 1);
-                this.ctx.globalAlpha = opacityBase * ratio * 0.4;
+            this.dropTrail.shape.forEach((row, py) => {
+                row.forEach((value, px) => {
+                    if (value) {
+                        const x = (this.dropTrail.x + px) * BLOCK_SIZE;
+                        const yStart = this.dropTrail.yStart * BLOCK_SIZE;
+                        const yEnd = (this.dropTrail.yEnd + py) * BLOCK_SIZE;
 
-                this.dropTrail.shape.forEach((row, py) => {
-                    row.forEach((value, px) => {
-                        if (value) {
-                            this.ctx.fillStyle = this.dropTrail.color;
-                            this.ctx.fillRect((this.dropTrail.x + px) * BLOCK_SIZE, (y + py) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                        }
-                    });
+                        const gradient = this.ctx.createLinearGradient(x, yStart, x, yEnd);
+                        gradient.addColorStop(0, 'transparent');
+                        gradient.addColorStop(1, `${this.dropTrail.color}${Math.floor(opacityBase * 0.4 * 255).toString(16).padStart(2, '0')}`);
+
+                        this.ctx.fillStyle = gradient;
+                        // 기둥 형태로 길게 그리기
+                        this.ctx.fillRect(x, yStart, BLOCK_SIZE, yEnd - yStart);
+                    }
                 });
-            }
-            this.ctx.globalAlpha = 1;
+            });
         }
     }
 
