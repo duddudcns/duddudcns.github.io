@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임</title>
+    <title>테트리스 게임 - v1.0.0</title>
     <style>
         * {
             margin: 0;
@@ -43,6 +43,17 @@
             margin-bottom: 5px;
             color: #00d4ff;
             text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: #00d4ff;
+            color: #1a1a2e;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
         }
 
         .game-content {
@@ -201,6 +212,64 @@
             margin-bottom: 20px;
         }
 
+        .release-notes {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: left;
+            border: 3px solid #00d4ff;
+            z-index: 1000;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .release-notes h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .release-notes .version-section {
+            margin-bottom: 20px;
+        }
+
+        .release-notes .version-title {
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .release-notes ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .release-notes li {
+            margin-bottom: 8px;
+        }
+
+        .close-notes {
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-notes:hover {
+            color: #ff006e;
+        }
+
         @media (max-width: 600px) {
             .game-content {
                 grid-template-columns: 1fr;
@@ -226,7 +295,7 @@
 <body>
     <div class="game-container">
         <div class="game-header">
-            <h1>🎮 TETRIS 🎮</h1>
+            <h1>🎮 TETRIS <span class="version-badge">v1.0.0</span></h1>
         </div>
 
         <div class="game-content">
@@ -260,6 +329,7 @@
                     <div class="button-group">
                         <button onclick="togglePause()">일시정지</button>
                         <button onclick="resetGame()">다시시작</button>
+                        <button onclick="showReleaseNotes()">릴리즈</button>
                     </div>
                 </div>
             </div>
@@ -270,6 +340,25 @@
         <h2>게임 오버!</h2>
         <p>최종 점수: <span id="finalScore">0</span></p>
         <button onclick="resetGame()">다시 시작</button>
+    </div>
+
+    <div class="release-notes" id="releaseNotesModal">
+        <span class="close-notes" onclick="closeReleaseNotes()">&times;</span>
+        <h2>릴리즈 노트</h2>
+        
+        <div class="version-section">
+            <div class="version-title">v1.0.0 - 초기 릴리즈</div>
+            <ul>
+                <li>✓ 완전한 테트리스 게임플레이 구현</li>
+                <li>✓ 7가지 기본 테트로미노 (I, O, T, S, Z, J, L)</li>
+                <li>✓ 점수 및 레벨 시스템</li>
+                <li>✓ 다음 블록 미리보기</li>
+                <li>✓ 키보드 컨트롤 (방향키, 회전, 빠른 낙하)</li>
+                <li>✓ 일시정지 / 다시시작 기능</li>
+                <li>✓ 반응형 디자인 (모바일/태블릿/데스크톱)</li>
+                <li>✓ 다시운 컬러 테마</li>
+            </ul>
+        </div>
     </div>
 
     <script>
@@ -513,6 +602,14 @@
             initGame();
         }
 
+        function showReleaseNotes() {
+            document.getElementById('releaseNotesModal').style.display = 'block';
+        }
+
+        function closeReleaseNotes() {
+            document.getElementById('releaseNotesModal').style.display = 'none';
+        }
+
         document.addEventListener('keydown', (e) => {
             if (!gameRunning || gamePaused) return;
             switch(e.key) {
@@ -528,6 +625,14 @@
                     break;
             }
         });
+
+        // 릴리즈 노트 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('releaseNotesModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
 
         initGame();
     </script>
