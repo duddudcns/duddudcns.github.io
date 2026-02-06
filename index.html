@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.2.1</title>
+    <title>테트리스 게임 - v1.2.2</title>
     <style>
         * {
             margin: 0;
@@ -227,7 +227,7 @@
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.1</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.2.2</span></h1>
         </div>
 
         <div class="game-content">
@@ -282,6 +282,13 @@
     <div id="releaseNotesModal" class="modal">
         <div class="modal-content">
             <h2>🚀 릴리즈 노트</h2>
+
+            <div class="release-item">
+                <div class="release-version">v1.2.2 - 조작 신뢰성 개선</div>
+                <ul class="release-list">
+                    <li>스페이스바(즉시 하강) 연속 입력 방지 (꾹 눌러도 한 번만 작동)</li>
+                </ul>
+            </div>
 
             <div class="release-item">
                 <div class="release-version">v1.2.1 - 조작 간섭 수정</div>
@@ -366,6 +373,8 @@
             right: 0,
             down: 0
         };
+        let hardDropProcessed = false; // 스페이스바 중복 입력 방지용
+
         const DAS = 170; // Delayed Auto Shift (첫 이동 후 대기 시간)
         const ARR = 50;  // Auto Repeat Rate (연속 이동 간격)
 
@@ -550,7 +559,7 @@
             if (keys['arrowdown']) {
                 if (keyTimers.down === 0) {
                     moveDown();
-                    keyTimers.down = ARR; // 소프트 드랍은 DAS 없이 바로 반복
+                    keyTimers.down = ARR;
                 } else {
                     keyTimers.down -= deltaTime;
                     if (keyTimers.down <= 0) {
@@ -666,6 +675,8 @@
             document.getElementById('level').innerText = '1';
             document.getElementById('gameOverModal').style.display = 'none';
             currentPiece = createPiece();
+            hardDropProcessed = false;
+            keys[' '] = false;
             draw();
         }
 
@@ -689,13 +700,16 @@
 
             if (gamePaused) return;
 
-            // 회전은 keydown 1회성 동작 (연속 동작 방지)
             if (key === 'w' || key === 'arrowup') {
                 currentPiece.rotate();
                 event.preventDefault();
             } else if (key === ' ') {
-                hardDrop();
                 event.preventDefault();
+                // 스페이스바가 처음 눌린 시점에만 즉시 하강 실행
+                if (!hardDropProcessed) {
+                    hardDrop();
+                    hardDropProcessed = true;
+                }
             } else if (['arrowleft', 'arrowright', 'arrowdown'].includes(key)) {
                 event.preventDefault();
             }
@@ -706,6 +720,11 @@
         window.addEventListener('keyup', event => {
             const key = event.key.toLowerCase();
             keys[key] = false;
+
+            // 스페이스바를 떼면 다시 입력 가능하도록 상태 초기화
+            if (key === ' ') {
+                hardDropProcessed = false;
+            }
         });
 
         currentPiece = createPiece();
