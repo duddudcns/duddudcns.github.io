@@ -132,11 +132,11 @@ class GameEngine {
             this.ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.3})`;
             this.ctx.lineWidth = 4;
             this.ctx.beginPath();
-            const centerX = (this.dropTrail.x + COLS_IN_PIECE / 2) * BLOCK_SIZE; // 대략적인 중앙
-            // 실제 조각의 x 범위 중앙 계산 (더 정확하게)
-            const xOffset = 2 * BLOCK_SIZE; // 블록 4칸 중 중앙
+
+            // 조각의 가로 중앙 부근에 수직선 그리기
+            const xOffset = 2 * BLOCK_SIZE;
             this.ctx.moveTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yStart * BLOCK_SIZE);
-            this.ctx.lineTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yEnd * BLOCK_SIZE + 40); // 40은 대략적인 조각 높이
+            this.ctx.lineTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yEnd * BLOCK_SIZE + (BLOCK_SIZE * 2));
             this.ctx.stroke();
             this.ctx.lineWidth = 1;
         }
