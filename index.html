@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테트리스 게임 - v1.3.14</title>
+    <title>테트리스 게임 - v1.3.15</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="game-wrapper">
         <div class="game-header">
-            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.14</span></h1>
+            <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.15</span></h1>
         </div>
 
         <div class="game-content">
@@ -30,8 +30,13 @@
             </div>
 
             <div class="sidebar sidebar-stats">
+                <div class="panel best-score-panel">
+                    <div class="panel-label">최고 점수</div>
+                    <div id="bestScoreSidebar" class="stat-value" style="color: #ffd700;">000000</div>
+                </div>
+
                 <div class="panel">
-                    <div class="panel-label">점수</div>
+                    <div class="panel-label">현재 점수</div>
                     <div id="score" class="stat-value">000000</div>
                 </div>
 
@@ -90,6 +95,15 @@
                 <h2>🚀 릴리즈 노트</h2>
             </div>
             <div class="release-scroll-area">
+                <div class="release-item">
+                    <div class="release-version">v1.3.15 - UI 최적화 및 편의 기능 추가</div>
+                    <ul class="release-list">
+                        <li>메인 화면에 최고 점수(Best Score) 상시 표시</li>
+                        <li>레벨 업 애니메이션 속도 최적화 (더욱 경쾌한 연출)</li>
+                        <li>조작 가이드 영역 공간 효율화 및 여백 조정</li>
+                    </ul>
+                </div>
+
                 <div class="release-item">
                     <div class="release-version">v1.3.14 - UI 편의성 및 레벨 연출 강화</div>
                     <ul class="release-list">

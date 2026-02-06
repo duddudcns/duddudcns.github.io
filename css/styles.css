@@ -98,6 +98,12 @@ canvas {
 
 .side.board-container {
     position: relative;
+
+    .best-score-panel {
+        border: 1px solid rgba(255, 215, 0, 0.3) !important;
+        background: rgba(255, 215, 0, 0.05) !important;
+    }
+
     padding: 8px;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 8px;
@@ -121,7 +127,7 @@ canvas {
 }
 
 .level-up-animate {
-    animation: levelUpFade 2s ease-out forwards;
+    animation: levelUpFade 1s ease-out forwards;
 }
 
 @keyframes levelUpFade {

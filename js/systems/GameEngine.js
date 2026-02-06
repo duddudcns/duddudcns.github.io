@@ -29,6 +29,8 @@ class GameEngine {
         this.flashTimer = 0;
         this.dropTrail = { active: false, x: 0, yStart: 0, yEnd: 0, timer: 0, shape: null, color: null };
 
+        this.updateBestScoreDisplay();
+
         // InputHandler를 가장 마지막에 초기화하여 this가 안정적으로 넘어가도록 함
         this.input = new InputHandler(this);
     }
@@ -267,6 +269,18 @@ class GameEngine {
         document.getElementById('score').innerText = this.score.toString().padStart(6, '0');
         document.getElementById('level').innerText = this.level;
         document.getElementById('dropSpeed').innerHTML = `${this.dropInterval}<span style="font-size: 0.8rem; margin-left: 2px;">ms</span>`;
+
+        // 실시간 최고 점수 갱신 (선택 사항이지만 역동성을 위해 추가)
+        const savedBest = localStorage.getItem('tetris_best_score') || 0;
+        if (this.score > savedBest) {
+            this.updateBestScoreDisplay(this.score);
+        }
+    }
+
+    updateBestScoreDisplay(score) {
+        const best = score || localStorage.getItem('tetris_best_score') || 0;
+        const el = document.getElementById('bestScoreSidebar');
+        if (el) el.innerText = best.toString().padStart(6, '0');
     }
 
     showLevelUp(level) {
@@ -319,6 +333,7 @@ class GameEngine {
         const currentBest = Math.max(savedBest, this.score);
         localStorage.setItem('tetris_best_score', currentBest);
 
+        this.updateBestScoreDisplay(currentBest);
         document.getElementById('finalScore').innerText = this.score.toString().padStart(6, '0');
         document.getElementById('bestScore').innerText = currentBest.toString().padStart(6, '0');
         document.getElementById('gameOverModal').style.display = 'flex';
