@@ -5,6 +5,12 @@ class GameEngine {
         this.nextCanvas = nextCanvas;
         this.nctx = nextCanvas.getContext('2d');
 
+        // 캔버스 크기 명시적 설정 (리팩토링 시 누락된 부분)
+        this.canvas.width = COLS * BLOCK_SIZE;
+        this.canvas.height = ROWS * BLOCK_SIZE;
+        this.nextCanvas.width = 120;
+        this.nextCanvas.height = 310;
+
         this.board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
         this.score = 0;
         this.level = 1;
