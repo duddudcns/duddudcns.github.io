@@ -27,7 +27,7 @@ class GameEngine {
         // 효과 관련 상태
         this.flashLines = []; // 지워질 줄 인덱스
         this.flashTimer = 0;
-        this.dropTrail = { active: false, x: 0, yStart: 0, yEnd: 0, timer: 0 };
+        this.dropTrail = { active: false, x: 0, yStart: 0, yEnd: 0, timer: 0, shape: null, color: null };
 
         // InputHandler를 가장 마지막에 초기화하여 this가 안정적으로 넘어가도록 함
         this.input = new InputHandler(this);
@@ -126,19 +126,26 @@ class GameEngine {
             });
         }
 
-        // 수직 강하 잔상 효과 (Drop Trail)
+        // 수직 강하 잔상 효과 (Drop Trail - Block Afterimage)
         if (this.dropTrail.active) {
-            const opacity = this.dropTrail.timer / 150;
-            this.ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.3})`;
-            this.ctx.lineWidth = 4;
-            this.ctx.beginPath();
+            const opacityBase = this.dropTrail.timer / 150;
 
-            // 조각의 가로 중앙 부근에 수직선 그리기
-            const xOffset = 2 * BLOCK_SIZE;
-            this.ctx.moveTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yStart * BLOCK_SIZE);
-            this.ctx.lineTo(this.dropTrail.x * BLOCK_SIZE + xOffset, this.dropTrail.yEnd * BLOCK_SIZE + (BLOCK_SIZE * 2));
-            this.ctx.stroke();
-            this.ctx.lineWidth = 1;
+            // 경로 중간 중간에 잔상 그리기
+            const step = Math.max(1, Math.floor((this.dropTrail.yEnd - this.dropTrail.yStart) / 3));
+            for (let y = this.dropTrail.yStart; y < this.dropTrail.yEnd; y += step) {
+                const ratio = (y - this.dropTrail.yStart) / (this.dropTrail.yEnd - this.dropTrail.yStart || 1);
+                this.ctx.globalAlpha = opacityBase * ratio * 0.3;
+
+                this.dropTrail.shape.forEach((row, py) => {
+                    row.forEach((value, px) => {
+                        if (value) {
+                            this.ctx.fillStyle = this.dropTrail.color;
+                            this.ctx.fillRect((this.dropTrail.x + px) * BLOCK_SIZE, (y + py) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        }
+                    });
+                });
+            }
+            this.ctx.globalAlpha = 1;
         }
     }
 
@@ -266,7 +273,9 @@ class GameEngine {
             x: this.currentPiece.x,
             yStart: startY,
             yEnd: endY,
-            timer: 150
+            timer: 150,
+            shape: this.currentPiece.shape,
+            color: this.currentPiece.color
         };
 
         this.lockPiece();
