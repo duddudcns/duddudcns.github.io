@@ -126,15 +126,15 @@ class GameEngine {
             });
         }
 
-        // 수직 강하 잔상 효과 (Drop Trail - Block Afterimage)
+        // 수직 강하 잔상 효과 (Drop Trail - Localized Afterimage)
         if (this.dropTrail.active) {
             const opacityBase = this.dropTrail.timer / 150;
 
-            // 경로 중간 중간에 잔상 그리기
-            const step = Math.max(1, Math.floor((this.dropTrail.yEnd - this.dropTrail.yStart) / 3));
-            for (let y = this.dropTrail.yStart; y < this.dropTrail.yEnd; y += step) {
-                const ratio = (y - this.dropTrail.yStart) / (this.dropTrail.yEnd - this.dropTrail.yStart || 1);
-                this.ctx.globalAlpha = opacityBase * ratio * 0.3;
+            // 착지 지점 기준 위쪽으로 2칸 정도만 잔상 표시
+            const startY = Math.max(this.dropTrail.yStart, this.dropTrail.yEnd - 2);
+            for (let y = startY; y < this.dropTrail.yEnd; y++) {
+                const ratio = (y - startY) / (this.dropTrail.yEnd - startY || 1);
+                this.ctx.globalAlpha = opacityBase * ratio * 0.4;
 
                 this.dropTrail.shape.forEach((row, py) => {
                     row.forEach((value, px) => {
