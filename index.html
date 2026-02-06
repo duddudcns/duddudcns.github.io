@@ -59,10 +59,20 @@
 
     <!-- 게임 오버 모달 -->
     <div id="gameOverModal" class="modal">
-        <div class="modal-content">
-            <h2>게임 오버</h2>
-            <p>최종 점수: <span id="finalScore">0</span></p>
-            <button onclick="resetGame()">다시 도전</button>
+        <div class="modal-content game-over-content">
+            <div class="game-over-icon">🎮</div>
+            <h2>GAME OVER</h2>
+            <div class="final-stats">
+                <div class="stat-group">
+                    <span class="stat-label">FINAL SCORE</span>
+                    <span id="finalScore" class="stat-value">000000</span>
+                </div>
+                <div class="stat-group best-score">
+                    <span class="stat-label">BEST SCORE</span>
+                    <span id="bestScore" class="stat-value">000000</span>
+                </div>
+            </div>
+            <button class="primary-btn" onclick="game.resetGame()">다시 시작</button>
         </div>
     </div>
 
