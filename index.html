@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="duddudcns의 개인 포트폴리오 및 프로젝트 소개 페이지">
+    <title>duddudcns - 포트폴리오</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        main {
+            padding: 4rem 0;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #667eea;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f2ff;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .project-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .project-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            section {
+                padding: 2rem 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="/" class="logo">duddudcns</a>
+                <ul>
+                    <li><a href="#about">소개</a></li>
+                    <li><a href="#projects">프로젝트</a></li>
+                    <li><a href="#contact">연락처</a></li>
+                </ul>
+            </nav>
+            <div class="hero">
+                <h1>안녕하세요! 👋</h1>
+                <p>창의적인 솔루션으로 문제를 해결하는 개발자입니다.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="about">
+            <h2>소개</h2>
+            <div class="intro-text">
+                <p>
+                    저는 웹 개발과 소프트웨어 엔지니어링에 열정을 가진 개발자입니다.
+                    새로운 기술을 배우고, 실제 문제를 해결하는 것을 좋아합니다.
+                </p>
+                <p>
+                    이 포트폴리오에서 제 프로젝트와 작업 경험을 살펴보세요.
+                </p>
+            </div>
+            <div class="button-group">
+                <a href="#projects" class="btn btn-primary">프로젝트 보기</a>
+                <a href="#contact" class="btn btn-secondary">연락하기</a>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>프로젝트</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3>프로젝트 1</h3>
+                    <p>프로젝트 설명을 추가하세요.</p>
+                </div>
+                <div class="project-card">
+                    <h3>프로젝트 2</h3>
+                    <p>프로젝트 설명을 추가하세요.</p>
+                </div>
+                <div class="project-card">
+                    <h3>프로젝트 3</h3>
+                    <p>프로젝트 설명을 추가하세요.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>연락처</h2>
+            <p>저와 연락하고 싶으신가요? 아래 방법으로 연락해주세요:</p>
+            <div class="button-group">
+                <a href="https://github.com/duddudcns" class="btn btn-primary">GitHub</a>
+                <a href="mailto:contact@example.com" class="btn btn-primary">이메일</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 duddudcns. All rights reserved.</p>
+    </footer>
+</body>
+</html>
