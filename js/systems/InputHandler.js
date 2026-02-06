@@ -60,8 +60,17 @@ class InputHandler {
         } else this.keyTimers.right = 0;
 
         if (this.keys['arrowdown']) {
-            if (this.keyTimers.down === 0) { this.game.moveDown(); this.keyTimers.down = this.ARR; }
-            else { this.keyTimers.down -= deltaTime; if (this.keyTimers.down <= 0) { this.game.moveDown(); this.keyTimers.down = this.ARR; } }
+            if (this.keyTimers.down === 0) {
+                this.game.moveDown();
+                this.keyTimers.down = this.DAS; // 처음 누를 때 DAS만큼 지연
+            }
+            else {
+                this.keyTimers.down -= deltaTime;
+                if (this.keyTimers.down <= 0) {
+                    this.game.moveDown();
+                    this.keyTimers.down = this.ARR;
+                }
+            }
         } else this.keyTimers.down = 0;
     }
 }

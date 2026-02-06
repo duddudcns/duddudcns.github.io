@@ -96,17 +96,17 @@ canvas {
     font-family: 'Courier New', Courier, monospace;
 }
 
-.next-preview-container {
-    background: #000;
-    margin: 0 auto;
-    border-radius: 4px;
-    border: 1px solid #1a2a3a;
-    padding: 5px;
+.next-preview-conta.sidebar-next {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    flex-grow: 1;
+    gap: 15px;
+    align-self: flex-start;
+    /* 상단 정렬 */
     justify-content: center;
 }
 

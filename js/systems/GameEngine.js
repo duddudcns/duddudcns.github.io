@@ -295,7 +295,14 @@ class GameEngine {
 
     gameOver() {
         this.gameRunning = false;
-        document.getElementById('finalScore').innerText = this.score;
+
+        // 최고 점수 처리
+        const savedBest = localStorage.getItem('tetris_best_score') || 0;
+        const currentBest = Math.max(savedBest, this.score);
+        localStorage.setItem('tetris_best_score', currentBest);
+
+        document.getElementById('finalScore').innerText = this.score.toString().padStart(6, '0');
+        document.getElementById('bestScore').innerText = currentBest.toString().padStart(6, '0');
         document.getElementById('gameOverModal').style.display = 'flex';
     }
 
