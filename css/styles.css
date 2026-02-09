@@ -12,6 +12,7 @@ body {
     align-items: center;
     height: 100vh;
     overflow: hidden;
+    padding: 5px;
     color: #fff;
 }
 
@@ -23,6 +24,8 @@ body {
     display: flex;
     flex-direction: column;
     border: 1px solid rgba(0, 212, 255, 0.2);
+    transform-origin: center center;
+    will-change: transform;
 }
 
 .game-header {
@@ -66,6 +69,12 @@ body {
     line-height: 0;
     overflow: hidden;
     /* 내부 캔버스 직각 모서리 깎기 */
+}
+
+.play-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 canvas {
@@ -196,6 +205,50 @@ button:hover {
 
 .controls-info div {
     margin-bottom: 2px;
+}
+
+.mobile-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    touch-action: none;
+    user-select: none;
+}
+
+.mobile-arrow-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.mobile-up-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+.mobile-up-row .mobile-control-btn {
+    grid-column: 2;
+}
+
+.mobile-control-btn {
+    padding: 14px 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #00d4ff, #0092b3);
+    color: #04131d;
+    box-shadow: 0 6px 16px rgba(0, 212, 255, 0.28);
+    touch-action: manipulation;
+}
+
+.mobile-space-btn {
+    width: 100%;
+    letter-spacing: 1px;
+}
+
+.mobile-control-btn:active {
+    transform: scale(0.97);
 }
 
 .modal {

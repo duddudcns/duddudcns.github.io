@@ -36,6 +36,51 @@ class GameEngine {
         this.input = new InputHandler(this);
     }
 
+    resizeToViewport() {
+        const wrapper = document.querySelector('.game-wrapper');
+        const gameContent = document.querySelector('.game-content');
+        const header = document.querySelector('.game-header');
+        const playArea = document.querySelector('.play-area');
+        const mobileControls = document.querySelector('.mobile-controls');
+        const nextSidebar = document.querySelector('.sidebar-next');
+        const statsSidebar = document.querySelector('.sidebar-stats');
+
+        if (!wrapper || !gameContent || !header || !playArea || !nextSidebar || !statsSidebar) return;
+
+        const wrapperStyle = window.getComputedStyle(wrapper);
+        const wrapperPadX = (parseFloat(wrapperStyle.paddingLeft) || 0) + (parseFloat(wrapperStyle.paddingRight) || 0);
+        const wrapperPadY = (parseFloat(wrapperStyle.paddingTop) || 0) + (parseFloat(wrapperStyle.paddingBottom) || 0);
+
+        const headerStyle = window.getComputedStyle(header);
+        const headerTotalHeight = header.offsetHeight + (parseFloat(headerStyle.marginBottom) || 0);
+
+        const contentStyle = window.getComputedStyle(gameContent);
+        const columnGap = parseFloat(contentStyle.columnGap || contentStyle.gap) || 0;
+
+        const playAreaStyle = window.getComputedStyle(playArea);
+        const playAreaGap = parseFloat(playAreaStyle.gap) || 0;
+        const controlsHeight = mobileControls && window.getComputedStyle(mobileControls).display !== 'none'
+            ? mobileControls.offsetHeight + playAreaGap
+            : 0;
+
+        const sidebarsWidth = nextSidebar.offsetWidth + statsSidebar.offsetWidth + (columnGap * 2);
+        const boardBorder = 6; // board-container border(3px * 2)
+
+        const widthBudget = Math.max(0, window.innerWidth - wrapperPadX - sidebarsWidth - boardBorder);
+        const heightBudget = Math.max(0, window.innerHeight - wrapperPadY - headerTotalHeight - controlsHeight - boardBorder);
+
+        const sizeByWidth = Math.floor(widthBudget / COLS);
+        const sizeByHeight = Math.floor(heightBudget / ROWS);
+        const nextBlockSize = Math.max(12, Math.min(sizeByWidth, sizeByHeight, 64));
+
+        if (!Number.isFinite(nextBlockSize) || nextBlockSize === BLOCK_SIZE) return;
+
+        BLOCK_SIZE = nextBlockSize;
+        this.canvas.width = COLS * BLOCK_SIZE;
+        this.canvas.height = ROWS * BLOCK_SIZE;
+        this.draw();
+    }
+
     getValidRandomType() {
         const types = 'IOTSZJL';
         let type;

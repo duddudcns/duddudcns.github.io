@@ -15,9 +15,23 @@
         </div>
 
         <div class="game-content">
-            <div class="board-container">
-                <canvas id="gameCanvas"></canvas>
-                <div id="levelOverlay" class="level-overlay"></div>
+            <div class="play-area">
+                <div class="board-container">
+                    <canvas id="gameCanvas"></canvas>
+                    <div id="levelOverlay" class="level-overlay"></div>
+                </div>
+
+                <div class="mobile-controls" aria-label="모바일 조작 버튼">
+                    <div class="mobile-up-row">
+                        <button id="mobileUpBtn" class="mobile-control-btn" type="button" aria-label="회전">▲</button>
+                    </div>
+                    <div class="mobile-arrow-row">
+                        <button id="mobileLeftBtn" class="mobile-control-btn" type="button" aria-label="왼쪽 이동">◀</button>
+                        <button id="mobileDownBtn" class="mobile-control-btn" type="button" aria-label="아래로 이동">▼</button>
+                        <button id="mobileRightBtn" class="mobile-control-btn" type="button" aria-label="오른쪽 이동">▶</button>
+                    </div>
+                    <button id="mobileSpaceBtn" class="mobile-control-btn mobile-space-btn" type="button" aria-label="즉시 하강">SPACE</button>
+                </div>
             </div>
 
             <div class="sidebar sidebar-next">
