@@ -322,7 +322,7 @@ class SwingEngine {
         if (window.AuthLeaderboard) {
             window.AuthLeaderboard.init()
                 .then(() => window.AuthLeaderboard.saveBestScore('noahnohah', bestDistance))
-                .catch(() => { });
+                .catch((err) => console.error('[noahnohah] score save failed:', err));
         }
     }
 

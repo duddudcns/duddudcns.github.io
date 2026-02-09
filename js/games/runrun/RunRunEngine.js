@@ -307,7 +307,7 @@ class RunRunEngine {
         if (window.AuthLeaderboard) {
             window.AuthLeaderboard.init()
                 .then(() => window.AuthLeaderboard.saveBestScore('runrun', this.score))
-                .catch(() => { });
+                .catch((err) => console.error('[runrun] score save failed:', err));
         }
     }
 

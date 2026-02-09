@@ -11,9 +11,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const render = (user) => {
         if (user) {
             statusEl.innerText = user.displayName || user.email || user.uid;
+            loginBtn.style.display = 'none';
             logoutBtn.style.display = 'inline-block';
         } else {
             statusEl.innerText = window.AppI18n ? window.AppI18n.t('auth.loggedOut', '로그인 안됨') : '로그인 안됨';
+            loginBtn.style.display = 'inline-block';
             logoutBtn.style.display = 'none';
         }
     };
@@ -22,6 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             await window.AuthLeaderboard.signIn();
         } catch (err) {
+            if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) {
+                return;
+            }
             alert(`로그인 실패: ${err.message}`);
         }
     });

@@ -286,7 +286,7 @@ class BreakoutEngine {
         if (window.AuthLeaderboard) {
             window.AuthLeaderboard.init()
                 .then(() => window.AuthLeaderboard.saveBestScore('breakout', this.score))
-                .catch(() => { });
+                .catch((err) => console.error('[breakout] score save failed:', err));
         }
     }
 

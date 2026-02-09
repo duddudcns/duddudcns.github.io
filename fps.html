@@ -271,8 +271,10 @@
         let lastFrameTime = 0;
 
         function updateFpsAuthButtons(user) {
+            const loginBtn = document.getElementById('fpsGoogleLoginBtn');
             const logoutBtn = document.getElementById('fpsLogoutBtn');
-            if (!logoutBtn) return;
+            if (!loginBtn || !logoutBtn) return;
+            loginBtn.style.display = user ? 'none' : 'inline-block';
             logoutBtn.style.display = user ? 'inline-block' : 'none';
         }
 
@@ -1216,7 +1218,7 @@
             if (window.AuthLeaderboard) {
                 window.AuthLeaderboard.init()
                     .then(() => window.AuthLeaderboard.saveBestScore('fps', score))
-                    .catch(() => { });
+                    .catch((err) => console.error('[fps] score save failed:', err));
             }
         }
 
@@ -1277,6 +1279,9 @@
                     try {
                         await window.AuthLeaderboard.signIn();
                     } catch (err) {
+                        if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) {
+                            return;
+                        }
                         alert(`로그인 실패: ${err.message}`);
                     }
                 });

@@ -7,6 +7,11 @@
     let initialized = false;
     let currentUser = null;
     const listeners = new Set();
+    let authReadyResolved = false;
+    let resolveAuthReady = null;
+    const authReadyPromise = new Promise((resolve) => {
+        resolveAuthReady = resolve;
+    });
 
     function hasFirebase() {
         return typeof window.firebase !== 'undefined' && !!window.FIREBASE_CONFIG;
@@ -39,6 +44,10 @@
             currentUser = user || null;
             if (user) {
                 await upsertUserProfile(user);
+            }
+            if (!authReadyResolved && resolveAuthReady) {
+                authReadyResolved = true;
+                resolveAuthReady(true);
             }
             emitAuthChanged();
         });
@@ -84,36 +93,46 @@
         if (!GAME_IDS.includes(gameId)) return false;
         if (!Number.isFinite(bestScore)) return false;
         if (!(await init())) return false;
-        if (!currentUser) return false;
+        await authReadyPromise;
+        if (!currentUser && auth && auth.currentUser) currentUser = auth.currentUser;
+        if (!currentUser) {
+            notify(`saveBestScore skipped: no authenticated user (game=${gameId})`);
+            return false;
+        }
 
         const uid = currentUser.uid;
         const ref = scoreDocRef(gameId, uid);
         const now = firebase.firestore.FieldValue.serverTimestamp();
 
-        await db.runTransaction(async (tx) => {
-            const snap = await tx.get(ref);
-            if (!snap.exists) {
-                tx.set(ref, {
-                    uid,
-                    displayName: currentUser.displayName || 'Player',
-                    photoURL: currentUser.photoURL || '',
-                    bestScore,
-                    updatedAt: now
-                });
-                return;
-            }
+        try {
+            await db.runTransaction(async (tx) => {
+                const snap = await tx.get(ref);
+                if (!snap.exists) {
+                    tx.set(ref, {
+                        uid,
+                        displayName: currentUser.displayName || 'Player',
+                        photoURL: currentUser.photoURL || '',
+                        bestScore,
+                        updatedAt: now
+                    });
+                    return;
+                }
 
-            const prev = snap.data();
-            const prevScore = Number(prev.bestScore || 0);
-            if (bestScore >= prevScore) {
-                tx.update(ref, {
-                    bestScore,
-                    displayName: currentUser.displayName || prev.displayName || 'Player',
-                    photoURL: currentUser.photoURL || prev.photoURL || '',
-                    updatedAt: now
-                });
-            }
-        });
+                const prev = snap.data();
+                const prevScore = Number(prev.bestScore || 0);
+                if (bestScore >= prevScore) {
+                    tx.update(ref, {
+                        bestScore,
+                        displayName: currentUser.displayName || prev.displayName || 'Player',
+                        photoURL: currentUser.photoURL || prev.photoURL || '',
+                        updatedAt: now
+                    });
+                }
+            });
+        } catch (err) {
+            notify(`saveBestScore failed (${gameId}): ${err.code || ''} ${err.message || err}`);
+            throw err;
+        }
 
         return true;
     }

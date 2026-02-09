@@ -395,7 +395,7 @@ class GameEngine {
         if (window.AuthLeaderboard) {
             window.AuthLeaderboard.init()
                 .then(() => window.AuthLeaderboard.saveBestScore('tetris', this.score))
-                .catch(() => { });
+                .catch((err) => console.error('[tetris] score save failed:', err));
         }
     }
 
