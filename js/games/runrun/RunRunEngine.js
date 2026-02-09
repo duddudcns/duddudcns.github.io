@@ -30,14 +30,30 @@ class RunRunEngine {
         this.map = []; // Terrain segments
         this.items = []; // Stars
         this.lastTime = 0;
+        this.accumulatedMs = 0;
+        this.fixedDeltaMs = 1000 / 60;
+        this.maxAccumulatedMs = 250;
         this.distance = 0;
+        this.lastStatusKey = 'runrun.touchToStart';
 
         // Key bindings
         this.handleInput = this.handleInput.bind(this);
         window.addEventListener('keydown', this.handleInput);
         this.canvas.addEventListener('mousedown', this.handleInput);
+        window.addEventListener('app:language-changed', () => this.applyStatusText());
 
         this.initMap();
+    }
+
+    t(key, fallback) {
+        if (window.AppI18n) return window.AppI18n.t(key, fallback);
+        return fallback;
+    }
+
+    applyStatusText() {
+        const statusOverlay = document.getElementById('statusOverlay');
+        if (!statusOverlay || !this.lastStatusKey) return;
+        statusOverlay.innerText = this.t(this.lastStatusKey, statusOverlay.innerText);
     }
 
     initMap() {
@@ -91,17 +107,17 @@ class RunRunEngine {
         this.items = [];
         this.initMap();
         document.getElementById('statusOverlay').style.opacity = 0;
-        this.update();
+        this.lastTime = performance.now();
+        this.accumulatedMs = 0;
+        requestAnimationFrame((t) => this.update(t));
     }
 
-    update(time = 0) {
+    step() {
         if (!this.gameRunning) return;
-        const dt = 16; // Use fixed dt for stability
-        this.lastTime = time;
 
         // Fever logic
         if (this.isFever) {
-            this.feverTimer -= dt;
+            this.feverTimer -= this.fixedDeltaMs;
             if (this.feverTimer <= 0) {
                 this.isFever = false;
                 this.speed -= 4;
@@ -145,7 +161,11 @@ class RunRunEngine {
             }
         });
 
-        if (!onGround && this.player.y < 400) this.player.isJumping = true;
+        if (!onGround && this.player.y < 400) {
+            // Allow one air jump even when the player walks off an edge without jumping.
+            if (!this.player.isJumping) this.player.doubleJump = true;
+            this.player.isJumping = true;
+        }
 
         // Item collection
         this.items.forEach(item => {
@@ -166,6 +186,21 @@ class RunRunEngine {
         // Game over
         if (this.player.y > this.canvas.height) {
             this.gameOver();
+        }
+    }
+
+    update(time = 0) {
+        if (!this.gameRunning) return;
+
+        if (!this.lastTime) this.lastTime = time;
+        let elapsed = time - this.lastTime;
+        this.lastTime = time;
+        elapsed = Math.min(elapsed, this.maxAccumulatedMs);
+        this.accumulatedMs += elapsed;
+
+        while (this.accumulatedMs >= this.fixedDeltaMs && this.gameRunning) {
+            this.step();
+            this.accumulatedMs -= this.fixedDeltaMs;
         }
 
         this.draw();
@@ -265,8 +300,15 @@ class RunRunEngine {
         this.gameRunning = false;
         document.getElementById('finalScore').innerText = this.score.toString().padStart(6, '0');
         document.getElementById('statusOverlay').style.opacity = 1;
-        document.getElementById('statusOverlay').innerText = 'GAME OVER';
+        this.lastStatusKey = 'runrun.gameOver';
+        this.applyStatusText();
         document.getElementById('gameOverModal').style.display = 'flex';
+
+        if (window.AuthLeaderboard) {
+            window.AuthLeaderboard.init()
+                .then(() => window.AuthLeaderboard.saveBestScore('runrun', this.score))
+                .catch(() => { });
+        }
     }
 
     resetGame() {
@@ -275,6 +317,8 @@ class RunRunEngine {
         this.fever = 0;
         this.isFever = false;
         this.speed = 4;
+        this.lastTime = 0;
+        this.accumulatedMs = 0;
         this.items = [];
         this.initMap();
         this.player.y = 200;
@@ -282,12 +326,14 @@ class RunRunEngine {
         this.updateUI();
         document.getElementById('gameOverModal').style.display = 'none';
         document.getElementById('statusOverlay').style.opacity = 1;
-        document.getElementById('statusOverlay').innerText = 'READY?';
+        this.lastStatusKey = 'runrun.ready';
+        this.applyStatusText();
         this.draw();
     }
 
     start() {
         this.draw();
-        document.getElementById('statusOverlay').innerText = 'TOUCH TO START';
+        this.lastStatusKey = 'runrun.touchToStart';
+        this.applyStatusText();
     }
 }

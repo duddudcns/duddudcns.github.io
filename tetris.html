@@ -4,12 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        document.documentElement.classList.add('i18n-pending');
+        try {
+            const savedLanguage = localStorage.getItem('site_language');
+            if (savedLanguage) document.documentElement.lang = savedLanguage;
+        } catch (_) { }
+    </script>
     <title>테트리스 게임 - v1.3.22</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="js/i18n.js" defer></script>
+    <script src="js/firebaseConfig.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+    <script src="js/services/authLeaderboard.js" defer></script>
 </head>
 
 <body>
     <div class="game-wrapper">
+        <div class="lang-switcher">
+            <label for="languageSelectTetris" data-i18n="lang.label">언어</label>
+            <select id="languageSelectTetris" data-language-select>
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
         <div class="game-header">
             <h1>TETRIS <span class="version-badge" onclick="showReleaseNotes()">v1.3.22</span></h1>
         </div>
@@ -36,7 +57,7 @@
 
             <div class="sidebar sidebar-next">
                 <div class="panel next-panel">
-                    <div class="panel-label">다음 블록들</div>
+                    <div class="panel-label" data-i18n="tetris.next">다음 블록들</div>
                     <div class="next-preview-container">
                         <canvas id="nextCanvas"></canvas>
                     </div>
@@ -45,22 +66,22 @@
 
             <div class="sidebar sidebar-stats">
                 <div class="panel best-score-panel">
-                    <div class="panel-label">최고 점수</div>
+                    <div class="panel-label" data-i18n="tetris.bestScore">최고 점수</div>
                     <div id="bestScoreSidebar" class="stat-value" style="color: #ffd700;">000000</div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-label">현재 점수</div>
+                    <div class="panel-label" data-i18n="tetris.currentScore">현재 점수</div>
                     <div id="score" class="stat-value">000000</div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-label">레벨</div>
+                    <div class="panel-label" data-i18n="tetris.level">레벨</div>
                     <div id="level" class="stat-value">1</div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-label">낙하 속도</div>
+                    <div class="panel-label" data-i18n="tetris.dropSpeed">낙하 속도</div>
                     <div id="dropSpeed" class="stat-value">1000<span
                             style="font-size: 0.8rem; margin-left: 2px;">ms</span></div>
                 </div>
@@ -68,18 +89,27 @@
                 <div class="panel">
                     <div class="button-group">
                         <button onclick="location.href='index.html'" id="homeBtn"
-                            style="background: #ff006e; color: white;">🏠 홈으로</button>
-                        <button onclick="togglePause()" id="pauseBtn">일시정지</button>
-                        <button onclick="resetGame()">재시작</button>
+                            style="background: #ff006e; color: white;" data-i18n="common.home">🏠 홈으로</button>
+                        <button onclick="togglePause()" id="pauseBtn" data-i18n="common.pause">일시정지</button>
+                        <button onclick="resetGame()" data-i18n="common.restart">재시작</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-label" data-i18n="common.account">계정</div>
+                    <div id="menuAuthStatus" class="auth-panel-status" data-i18n="auth.loggedOut">로그인 안됨</div>
+                    <div class="auth-panel-buttons">
+                        <button id="menuGoogleLoginBtn" data-i18n="auth.loginGoogle">Google 로그인</button>
+                        <button id="menuLogoutBtn" data-i18n="auth.logout">로그아웃</button>
                     </div>
                 </div>
 
                 <div class="panel controls-info">
-                    <div class="panel-label">조작방법</div>
-                    <div>방향키 : 이동 / 하강</div>
-                    <div>W / ↑ : 회전</div>
-                    <div>Space : 즉시 하강</div>
-                    <div>P : 일시정지</div>
+                    <div class="panel-label" data-i18n="common.controls">조작방법</div>
+                    <div data-i18n="tetris.controls.leftRightDown">방향키 : 이동 / 하강</div>
+                    <div data-i18n="tetris.controls.rotate">W / ↑ : 회전</div>
+                    <div data-i18n="tetris.controls.hardDrop">Space : 즉시 하강</div>
+                    <div data-i18n="tetris.controls.pause">P : 일시정지</div>
                 </div>
             </div>
         </div>
@@ -89,18 +119,18 @@
     <div id="gameOverModal" class="modal">
         <div class="modal-content game-over-content">
             <div class="game-over-icon">🎮</div>
-            <h2>게임 종료</h2>
+            <h2 data-i18n="tetris.gameOver">게임 종료</h2>
             <div class="final-stats">
                 <div class="stat-group">
-                    <span class="stat-label">최종 점수</span>
+                    <span class="stat-label" data-i18n="tetris.finalScore">최종 점수</span>
                     <span id="finalScore" class="stat-value">000000</span>
                 </div>
                 <div class="stat-group best-score">
-                    <span class="stat-label">최고 기록</span>
+                    <span class="stat-label" data-i18n="tetris.bestRecord">최고 기록</span>
                     <span id="bestScore" class="stat-value">000000</span>
                 </div>
             </div>
-            <button class="primary-btn" onclick="game.resetGame()">다시 시작</button>
+            <button class="primary-btn" onclick="game.resetGame()" data-i18n="tetris.retry">다시 시작</button>
         </div>
     </div>
 
@@ -108,7 +138,7 @@
     <div id="releaseNotesModal" class="modal">
         <div class="modal-content">
             <div class="release-header">
-                <h2>🚀 릴리즈 노트</h2>
+                <h2 data-i18n="tetris.releaseNotes">🚀 릴리즈 노트</h2>
             </div>
             <div class="release-scroll-area">
                 <div class="release-item">
@@ -303,7 +333,7 @@
                     </ul>
                 </div>
             </div>
-            <button class="close-btn" onclick="closeReleaseNotes()">닫기</button>
+            <button class="close-btn" onclick="closeReleaseNotes()" data-i18n="common.close">닫기</button>
         </div>
     </div>
 
@@ -313,6 +343,7 @@
     <script src="js/systems/InputHandler.js" defer></script>
     <script src="js/systems/GameEngine.js" defer></script>
     <script src="js/main.js" defer></script>
+    <script src="js/menu-auth.js" defer></script>
 </body>
 
 </html>

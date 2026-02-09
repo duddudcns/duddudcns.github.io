@@ -11,9 +11,9 @@
             if (savedLanguage) document.documentElement.lang = savedLanguage;
         } catch (_) { }
     </script>
-    <title data-i18n="home.swing.name">놓아놓아</title>
+    <title data-i18n="home.breakout.name">벽돌깨기</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/games/noahnohah.css">
+    <link rel="stylesheet" href="css/games/breakout.css">
     <script src="js/i18n.js" defer></script>
     <script src="js/firebaseConfig.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
@@ -25,27 +25,37 @@
 <body>
     <div class="game-wrapper">
         <div class="lang-switcher">
-            <label for="languageSelectSwing" data-i18n="lang.label">언어</label>
-            <select id="languageSelectSwing" data-language-select>
+            <label for="languageSelectBreakout" data-i18n="lang.label">언어</label>
+            <select id="languageSelectBreakout" data-language-select>
                 <option value="ko">한국어</option>
                 <option value="en">English</option>
             </select>
         </div>
 
         <div class="game-header">
-            <h1><span data-i18n="home.swing.name">놓아놓아</span> <span class="version-badge">SWING</span></h1>
+            <h1><span data-i18n="home.breakout.name">벽돌깨기</span> <span class="version-badge">ARCADE</span></h1>
         </div>
 
-        <div class="game-content swing-layout">
+        <div class="game-content breakout-layout">
             <div class="board-container">
                 <canvas id="gameCanvas"></canvas>
-                <div id="statusOverlay" class="level-overlay" data-i18n="swing.touchToStart">TOUCH TO START</div>
+                <div id="statusOverlay" class="level-overlay" data-i18n="breakout.touchToStart">TOUCH TO START</div>
             </div>
 
             <div class="sidebar sidebar-stats">
                 <div class="panel">
-                    <div class="panel-label" data-i18n="swing.distance">거리</div>
-                    <div id="score" class="stat-value">0<span style="font-size: 0.8rem;">m</span></div>
+                    <div class="panel-label" data-i18n="breakout.score">점수</div>
+                    <div id="score" class="stat-value">000000</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-label" data-i18n="breakout.lives">목숨</div>
+                    <div id="lives" class="stat-value">3</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-label" data-i18n="breakout.level">레벨</div>
+                    <div id="level" class="stat-value">1</div>
                 </div>
 
                 <div class="panel">
@@ -67,8 +77,9 @@
 
                 <div class="panel controls-info">
                     <div class="panel-label" data-i18n="common.controls">조작방법</div>
-                    <div data-i18n="swing.control.tap">클릭: 줄 쏘기/놓기</div>
-                    <div data-i18n="swing.control.timing">타이밍 맞춰 스윙!</div>
+                    <div data-i18n="breakout.control.move">← / → : 패들 이동</div>
+                    <div data-i18n="breakout.control.launch">Space : 공 발사</div>
+                    <div data-i18n="breakout.control.mouse">마우스/터치 : 패들 이동</div>
                 </div>
             </div>
         </div>
@@ -76,24 +87,25 @@
 
     <div id="gameOverModal" class="modal">
         <div class="modal-content game-over-content">
-            <div class="game-over-icon">🐒</div>
-            <h2 data-i18n="swing.fall">추락!</h2>
+            <div class="game-over-icon">🧱</div>
+            <h2 data-i18n="breakout.gameOver">게임 오버</h2>
             <div class="final-stats">
                 <div class="stat-group">
-                    <span class="stat-label" data-i18n="swing.finalDistance">최종 거리</span>
-                    <span id="finalScore" class="stat-value">0m</span>
+                    <span class="stat-label" data-i18n="breakout.finalScore">최종 점수</span>
+                    <span id="finalScore" class="stat-value">000000</span>
                 </div>
             </div>
-            <button class="primary-btn" onclick="window.game.resetGame()" data-i18n="swing.retry">다시 스윙</button>
+            <button class="primary-btn" onclick="window.game.resetGame()" data-i18n="breakout.retry">다시 시작</button>
         </div>
     </div>
 
-    <script src="js/games/noahnohah/SwingEngine.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+    <script src="js/games/breakout/BreakoutEngine.js"></script>
     <script src="js/menu-auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('gameCanvas');
-            window.game = new SwingEngine(canvas);
+            window.game = new BreakoutEngine(canvas);
             window.game.start();
         });
     </script>

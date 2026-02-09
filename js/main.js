@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupMobileControls();
     setupResponsiveCanvas();
+
+    window.addEventListener('app:language-changed', () => {
+        if (!window.game) return;
+        const pauseBtn = document.getElementById('pauseBtn');
+        if (!pauseBtn) return;
+        pauseBtn.innerText = window.game.gamePaused
+            ? window.game.t('common.resume', '재개하기')
+            : window.game.t('common.pause', '일시정지');
+    });
 });
 
 function setupMobileControls() {
@@ -105,7 +114,13 @@ function setupResponsiveCanvas() {
             (viewportWidth - outerMargin) / baseWidth,
             (viewportHeight - outerMargin) / baseHeight
         );
-        wrapper.style.transform = `scale(${scale})`;
+        if ('zoom' in document.body.style) {
+            wrapper.style.zoom = String(scale);
+            wrapper.style.transform = 'none';
+        } else {
+            wrapper.style.zoom = '';
+            wrapper.style.transform = `scale(${scale})`;
+        }
     };
 
     let rafId = null;

@@ -36,6 +36,11 @@ class GameEngine {
         this.input = new InputHandler(this);
     }
 
+    t(key, fallback) {
+        if (window.AppI18n) return window.AppI18n.t(key, fallback);
+        return fallback;
+    }
+
     resizeToViewport() {
         const wrapper = document.querySelector('.game-wrapper');
         const gameContent = document.querySelector('.game-content');
@@ -369,7 +374,9 @@ class GameEngine {
 
     togglePause() {
         this.gamePaused = !this.gamePaused;
-        document.getElementById('pauseBtn').innerText = this.gamePaused ? '재개하기' : '일시정지';
+        document.getElementById('pauseBtn').innerText = this.gamePaused
+            ? this.t('common.resume', '재개하기')
+            : this.t('common.pause', '일시정지');
     }
 
     gameOver() {
@@ -384,6 +391,12 @@ class GameEngine {
         document.getElementById('finalScore').innerText = this.score.toString().padStart(6, '0');
         document.getElementById('bestScore').innerText = currentBest.toString().padStart(6, '0');
         document.getElementById('gameOverModal').style.display = 'flex';
+
+        if (window.AuthLeaderboard) {
+            window.AuthLeaderboard.init()
+                .then(() => window.AuthLeaderboard.saveBestScore('tetris', this.score))
+                .catch(() => { });
+        }
     }
 
     resetGame() {

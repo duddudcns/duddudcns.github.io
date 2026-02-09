@@ -4,49 +4,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        document.documentElement.classList.add('i18n-pending');
+        try {
+            const savedLanguage = localStorage.getItem('site_language');
+            if (savedLanguage) document.documentElement.lang = savedLanguage;
+        } catch (_) { }
+    </script>
     <title>미니게임천국 - Minigame Heaven</title>
     <link rel="stylesheet" href="css/main.css">
+    <script src="js/i18n.js" defer></script>
+    <script src="js/firebaseConfig.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+    <script src="js/services/authLeaderboard.js" defer></script>
+    <script src="js/main-home.js" defer></script>
 </head>
 
 <body>
+    <div class="lang-switcher">
+        <label for="languageSelect" data-i18n="lang.label">언어</label>
+        <select id="languageSelect" data-language-select>
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+        </select>
+    </div>
+
     <header class="hero">
-        <h1 class="title">미니게임천국</h1>
-        <p class="subtitle">MINIGAME HEAVEN</p>
+        <h1 class="title" data-i18n="home.title">미니게임천국</h1>
+        <p class="subtitle" data-i18n="home.subtitle">MINIGAME HEAVEN</p>
     </header>
 
     <main class="game-container">
         <!-- 테트리스 -->
         <div class="game-card" onclick="location.href='runrun.html'">
             <div class="game-thumb">🏃</div>
-            <h3>달려달려</h3>
-            <p style="margin-bottom: 20px; color: #8892b0;">장애물 피하기의 전설</p>
-            <button class="play-btn">START</button>
+            <h3 data-i18n="home.runrun.name">달려달려</h3>
+            <p style="margin-bottom: 20px; color: #8892b0;" data-i18n="home.runrun.desc">장애물 피하기의 전설</p>
+            <button class="play-btn" data-i18n="home.start">START</button>
         </div>
 
         <!-- 커밍 순 카드들 -->
         <div class="game-card" onclick="location.href='tetris.html'">
             <div class="game-thumb">🧱</div>
-            <h3>테트리스</h3>
-            <p style="margin-bottom: 20px; color: #8892b0;">클래식 퍼즐의 정석</p>
-            <button class="play-btn">START</button>
+            <h3 data-i18n="home.tetris.name">테트리스</h3>
+            <p style="margin-bottom: 20px; color: #8892b0;" data-i18n="home.tetris.desc">클래식 퍼즐의 정석</p>
+            <button class="play-btn" data-i18n="home.start">START</button>
         </div>
 
         <div class="game-card" onclick="location.href='noahnohah.html'">
             <div class="game-thumb">🕸️</div>
-            <h3>놓아놓아</h3>
-            <p style="margin-bottom: 20px; color: #8892b0;">스파이더맨 줄타기</p>
-            <button class="play-btn">START</button>
+            <h3 data-i18n="home.swing.name">놓아놓아</h3>
+            <p style="margin-bottom: 20px; color: #8892b0;" data-i18n="home.swing.desc">스파이더맨 줄타기</p>
+            <button class="play-btn" data-i18n="home.start">START</button>
         </div>
 
         <div class="game-card" onclick="location.href='fps.html'">
             <div class="game-thumb">🔫</div>
-            <h3>FPS 슈팅</h3>
-            <p style="margin-bottom: 20px; color: #8892b0;">3D 타겟 사격</p>
-            <button class="play-btn">START</button>
+            <h3 data-i18n="home.fps.name">FPS 슈팅</h3>
+            <p style="margin-bottom: 20px; color: #8892b0;" data-i18n="home.fps.desc">3D 타겟 사격</p>
+            <button class="play-btn" data-i18n="home.start">START</button>
+        </div>
+
+        <div class="game-card" onclick="location.href='breakout.html'">
+            <div class="game-thumb">🪩</div>
+            <h3 data-i18n="home.breakout.name">벽돌깨기</h3>
+            <p style="margin-bottom: 20px; color: #8892b0;" data-i18n="home.breakout.desc">공으로 벽돌을 부숴라</p>
+            <button class="play-btn" data-i18n="home.start">START</button>
         </div>
     </main>
 
-    <footer>
+    <section class="community-panel">
+        <div class="auth-row">
+            <div id="authStateText" data-i18n="auth.loggedOut">로그인 안됨</div>
+            <div class="auth-actions">
+                <button id="googleLoginBtn" class="play-btn" data-i18n="auth.loginGoogle">Google 로그인</button>
+                <button id="logoutBtn" class="play-btn secondary-btn" data-i18n="auth.logout">로그아웃</button>
+            </div>
+        </div>
+        <div class="leaderboard-row">
+            <label for="leaderboardGameSelect">랭킹 게임</label>
+            <select id="leaderboardGameSelect">
+                <option value="runrun">달려달려</option>
+                <option value="tetris">테트리스</option>
+                <option value="noahnohah">놓아놓아</option>
+                <option value="fps">FPS 슈팅</option>
+                <option value="breakout">벽돌깨기</option>
+            </select>
+            <button id="refreshLeaderboardBtn" class="play-btn">새로고침</button>
+        </div>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>이름</th>
+                    <th>점수</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+        </table>
+    </section>
+
+    <footer data-i18n="home.footer">
         &copy; 2026 Minigame Heaven. All rights reserved.
     </footer>
 </body>

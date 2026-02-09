@@ -15,6 +15,14 @@
     box-sizing: border-box;
 }
 
+html.i18n-pending body {
+    visibility: hidden;
+}
+
+html.i18n-ready body {
+    visibility: visible;
+}
+
 body {
     font-family: 'Do Hyeon', sans-serif;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -24,6 +32,35 @@ body {
     flex-direction: column;
     align-items: center;
     overflow-x: hidden;
+}
+
+.lang-switcher {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 6px 10px;
+    backdrop-filter: blur(6px);
+}
+
+.lang-switcher label {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+.lang-switcher select {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(26, 26, 46, 0.95);
+    color: #fff;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-family: inherit;
 }
 
 .hero {
@@ -134,4 +171,59 @@ footer {
     padding: 40px;
     color: rgba(255, 255, 255, 0.3);
     font-size: 0.9rem;
+}
+
+.community-panel {
+    width: 90%;
+    max-width: 1200px;
+    margin: 6px 0 20px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.auth-row,
+.leaderboard-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 8px;
+}
+
+#authStateText {
+    flex: 1;
+    color: #d7e6ff;
+}
+
+.secondary-btn {
+    background: #314266;
+    box-shadow: 0 5px 0 #24324e;
+}
+
+.leaderboard-row select {
+    background: rgba(12, 18, 40, 0.9);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
 }

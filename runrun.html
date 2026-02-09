@@ -4,31 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>달려달려 - 미니게임천국</title>
+    <script>
+        document.documentElement.classList.add('i18n-pending');
+        try {
+            const savedLanguage = localStorage.getItem('site_language');
+            if (savedLanguage) document.documentElement.lang = savedLanguage;
+        } catch (_) { }
+    </script>
+    <title data-i18n="home.runrun.name">달려달려</title>
     <link rel="stylesheet" href="css/games/runrun.css">
     <link rel="stylesheet" href="css/styles.css"> <!-- Reusing some base styles -->
+    <script src="js/i18n.js" defer></script>
+    <script src="js/firebaseConfig.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+    <script src="js/services/authLeaderboard.js" defer></script>
 </head>
 
 <body>
     <div class="game-wrapper">
+        <div class="lang-switcher">
+            <label for="languageSelectRunRun" data-i18n="lang.label">언어</label>
+            <select id="languageSelectRunRun" data-language-select>
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
         <div class="game-header">
-            <h1>달려달려 <span class="version-badge">CLASSIC</span></h1>
+            <h1><span data-i18n="home.runrun.name">달려달려</span> <span class="version-badge">CLASSIC</span></h1>
         </div>
 
         <div class="game-content runrun-layout">
             <div class="board-container">
                 <canvas id="gameCanvas"></canvas>
-                <div id="statusOverlay" class="level-overlay">READY?</div>
+                <div id="statusOverlay" class="level-overlay" data-i18n="runrun.ready">READY?</div>
             </div>
 
             <div class="sidebar sidebar-stats">
                 <div class="panel">
-                    <div class="panel-label">현재 점수</div>
+                    <div class="panel-label" data-i18n="runrun.score">현재 점수</div>
                     <div id="score" class="stat-value">000000</div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-label">피버 게이지</div>
+                    <div class="panel-label" data-i18n="runrun.fever">피버 게이지</div>
                     <div class="fever-bar-container">
                         <div id="hpBar" class="hp-bar-fill"></div>
                     </div>
@@ -36,16 +57,25 @@
 
                 <div class="panel">
                     <div class="button-group">
-                        <button onclick="location.href='index.html'" style="background: #ff006e; color: white;">🏠
-                            홈으로</button>
-                        <button onclick="window.game.resetGame()">재시작</button>
+                        <button onclick="location.href='index.html'" style="background: #ff006e; color: white;"
+                            data-i18n="common.home">🏠 홈으로</button>
+                        <button onclick="window.game.resetGame()" data-i18n="common.restart">재시작</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-label" data-i18n="common.account">계정</div>
+                    <div id="menuAuthStatus" class="auth-panel-status" data-i18n="auth.loggedOut">로그인 안됨</div>
+                    <div class="auth-panel-buttons">
+                        <button id="menuGoogleLoginBtn" data-i18n="auth.loginGoogle">Google 로그인</button>
+                        <button id="menuLogoutBtn" data-i18n="auth.logout">로그아웃</button>
                     </div>
                 </div>
 
                 <div class="panel controls-info">
-                    <div class="panel-label">조작방법</div>
-                    <div>아무 키나 클릭 : 점프</div>
-                    <div>(공중에서 한 번 더 가능)</div>
+                    <div class="panel-label" data-i18n="common.controls">조작방법</div>
+                    <div data-i18n="runrun.control.jump">아무 키나 클릭 : 점프</div>
+                    <div data-i18n="runrun.control.jump2">(공중에서 한 번 더 가능)</div>
                 </div>
             </div>
         </div>
@@ -55,18 +85,19 @@
     <div id="gameOverModal" class="modal">
         <div class="modal-content game-over-content">
             <div class="game-over-icon">🏃</div>
-            <h2>기록 달성!</h2>
+            <h2 data-i18n="runrun.clear">기록 달성!</h2>
             <div class="final-stats">
                 <div class="stat-group">
-                    <span class="stat-label">최종 점수</span>
+                    <span class="stat-label" data-i18n="runrun.finalScore">최종 점수</span>
                     <span id="finalScore" class="stat-value">000000</span>
                 </div>
             </div>
-            <button class="primary-btn" onclick="window.game.resetGame()">다시 달리기</button>
+            <button class="primary-btn" onclick="window.game.resetGame()" data-i18n="runrun.retry">다시 달리기</button>
         </div>
     </div>
 
     <script src="js/games/runrun/RunRunEngine.js"></script>
+    <script src="js/menu-auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('gameCanvas');

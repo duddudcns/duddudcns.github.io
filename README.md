@@ -26,6 +26,11 @@
 - 적 AI와의 전투 (추적, 사격)
 - 다양한 지형과 플랫폼 액션
 
+### 벽돌깨기 (Breakout)
+- 클래식 아케이드 벽돌깨기
+- 패들 반사 각도 기반 컨트롤
+- 레벨 진행/생명 시스템
+
 ## 🎯 조작법
 
 | 게임 | 조작 |
@@ -34,6 +39,19 @@
 | 달려달려 | 아무키/클릭: 점프 |
 | 놓아놓아 | 클릭: 줄 쏘기/놓기 |
 | FPS 슈팅 | WASD: 이동, 마우스: 조준/발사, R: 재장전, Space: 점프, Shift: 달리기 |
+| 벽돌깨기 | ←→/A,D: 이동, Space/클릭: 발사 |
+
+## 🔐 로그인/랭킹 (Firebase)
+
+- Google 로그인: Firebase Auth
+- 게임별 최고점: Firestore
+- 홈에서 게임별 TOP 랭킹 조회
+
+설정 방법:
+1. Firebase 프로젝트 생성 후 Google 로그인(Auth) 활성화
+2. Firestore 생성
+3. `js/firebaseConfig.js`에 웹 앱 설정값 입력
+4. `firestore.rules` 내용을 Firestore Rules에 적용
 
 ## 🚀 플레이
 

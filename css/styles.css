@@ -4,6 +4,14 @@
     box-sizing: border-box;
 }
 
+html.i18n-pending body {
+    visibility: hidden;
+}
+
+html.i18n-ready body {
+    visibility: visible;
+}
+
 body {
     font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -26,6 +34,37 @@ body {
     border: 1px solid rgba(0, 212, 255, 0.2);
     transform-origin: center center;
     will-change: transform;
+    position: relative;
+}
+
+.lang-switcher {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 6px 10px;
+    backdrop-filter: blur(6px);
+}
+
+.lang-switcher label {
+    font-size: 0.75rem;
+    color: #cbd5e1;
+}
+
+.lang-switcher select {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(26, 26, 46, 0.95);
+    color: #fff;
+    border-radius: 8px;
+    padding: 3px 7px;
+    font-family: inherit;
+    font-size: 0.75rem;
 }
 
 .game-header {
@@ -249,6 +288,24 @@ button:hover {
 
 .mobile-control-btn:active {
     transform: scale(0.97);
+}
+
+.auth-panel-status {
+    font-size: 0.75rem;
+    color: #d7e6ff;
+    margin-bottom: 8px;
+    word-break: break-all;
+}
+
+.auth-panel-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.auth-panel-buttons button {
+    flex: 1;
+    padding: 8px 6px;
+    font-size: 0.72rem;
 }
 
 .modal {

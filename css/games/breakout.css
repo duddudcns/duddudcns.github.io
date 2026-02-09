@@ -1,0 +1,13 @@
+.breakout-layout {
+    grid-template-columns: auto 220px !important;
+}
+
+#gameCanvas {
+    background: linear-gradient(to bottom, #0b1020 0%, #121f3f 55%, #10172d 100%);
+    cursor: crosshair;
+}
+
+.board-container {
+    border-color: #ffd166 !important;
+    box-shadow: 0 0 25px rgba(255, 209, 102, 0.32) !important;
+}

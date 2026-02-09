@@ -7,7 +7,7 @@ class SwingEngine {
 
         this.gameRunning = false;
         this.distance = 0;
-        this.speed = 2;
+        this.speed = 4;
 
         // Player state
         this.player = {
@@ -29,8 +29,13 @@ class SwingEngine {
             angularVelocity: 0
         };
 
-        this.gravity = 0.12;
+        this.gravity = 0.24;
         this.lastTime = 0;
+        this.accumulatedMs = 0;
+        this.fixedDeltaMs = 1000 / 60;
+        this.maxAccumulatedMs = 250;
+        this.ropeSpeedMultiplier = 1.5;
+        this.lastStatusKey = 'swing.touchToStart';
 
         // Ceiling anchors (visual dots on ceiling)
         this.anchors = [];
@@ -40,6 +45,18 @@ class SwingEngine {
         this.handleInput = this.handleInput.bind(this);
         window.addEventListener('mousedown', this.handleInput);
         window.addEventListener('keydown', this.handleInput);
+        window.addEventListener('app:language-changed', () => this.applyStatusText());
+    }
+
+    t(key, fallback) {
+        if (window.AppI18n) return window.AppI18n.t(key, fallback);
+        return fallback;
+    }
+
+    applyStatusText() {
+        const statusOverlay = document.getElementById('statusOverlay');
+        if (!statusOverlay || !this.lastStatusKey) return;
+        statusOverlay.innerText = this.t(this.lastStatusKey, statusOverlay.innerText);
     }
 
     generateAnchors() {
@@ -107,7 +124,7 @@ class SwingEngine {
         this.player.vy = tangentSpeed * Math.cos(this.rope.angle);
 
         // Cap max velocity on release
-        const maxVel = 3;
+        const maxVel = 6;
         this.player.vx = Math.max(-maxVel, Math.min(maxVel, this.player.vx));
         this.player.vy = Math.max(-maxVel, Math.min(maxVel, this.player.vy));
         this.player.airTime = 0;  // Reset hang time
@@ -118,10 +135,10 @@ class SwingEngine {
     startGame() {
         this.gameRunning = true;
         this.distance = 0;
-        this.speed = 2;
+        this.speed = 4;
         this.player.x = 100;
         this.player.y = 150;
-        this.player.vx = 3;
+        this.player.vx = 6;
         this.player.vy = 0;
         this.rope.attached = false;
         this.generateAnchors();
@@ -130,27 +147,30 @@ class SwingEngine {
         this.attachRope();
 
         document.getElementById('statusOverlay').style.opacity = 0;
-        this.update();
+        this.lastTime = performance.now();
+        this.accumulatedMs = 0;
+        requestAnimationFrame((t) => this.update(t));
     }
 
-    update(time = 0) {
+    step() {
         if (!this.gameRunning) return;
+        const scrollMultiplier = this.ropeSpeedMultiplier;
 
         if (this.rope.attached) {
             // Realistic pendulum physics with controlled speed
             const angularAcceleration = (this.gravity * 0.125 / this.rope.length) * Math.cos(this.rope.angle);
             this.rope.angularVelocity += angularAcceleration;
             // Cap maximum swing speed - very slow
-            const maxAngularVelocity = 0.03;
+            const maxAngularVelocity = 0.06;
             this.rope.angularVelocity = Math.max(-maxAngularVelocity, Math.min(maxAngularVelocity, this.rope.angularVelocity));
-            this.rope.angle += this.rope.angularVelocity;
+            this.rope.angle += this.rope.angularVelocity * this.ropeSpeedMultiplier;
 
             // Update player position based on rope
             this.player.x = this.rope.anchorX + Math.cos(this.rope.angle) * this.rope.length;
             this.player.y = this.rope.anchorY + Math.sin(this.rope.angle) * this.rope.length;
 
             // Move anchor with world scroll
-            this.rope.anchorX -= this.speed;
+            this.rope.anchorX -= this.speed * scrollMultiplier;
         } else {
             // Free fall / flight with hang time
             this.player.airTime++;
@@ -170,13 +190,13 @@ class SwingEngine {
         // Camera follows player - responsive tracking
         const targetX = 150;
         const cameraAdjust = (this.player.x - targetX) * 0.1;
-        this.speed = Math.max(2, 2 + cameraAdjust);
+        this.speed = Math.max(4, 4 + cameraAdjust);
 
         // Apply camera scroll to player position
-        this.player.x -= this.speed;
+        this.player.x -= this.speed * scrollMultiplier;
 
         // World scroll
-        this.distance += this.speed;
+        this.distance += this.speed * scrollMultiplier;
 
         // Generate more anchors if needed
         const lastAnchorWorldX = this.anchors[this.anchors.length - 1].x;
@@ -206,6 +226,21 @@ class SwingEngine {
 
         // Update UI
         document.getElementById('score').innerHTML = Math.floor(this.distance) + '<span style="font-size: 0.8rem;">m</span>';
+    }
+
+    update(time = 0) {
+        if (!this.gameRunning) return;
+
+        if (!this.lastTime) this.lastTime = time;
+        let elapsed = time - this.lastTime;
+        this.lastTime = time;
+        elapsed = Math.min(elapsed, this.maxAccumulatedMs);
+        this.accumulatedMs += elapsed;
+
+        while (this.accumulatedMs >= this.fixedDeltaMs && this.gameRunning) {
+            this.step();
+            this.accumulatedMs -= this.fixedDeltaMs;
+        }
 
         this.draw();
         requestAnimationFrame((t) => this.update(t));
@@ -280,14 +315,23 @@ class SwingEngine {
 
     gameOver() {
         this.gameRunning = false;
-        document.getElementById('finalScore').innerText = Math.floor(this.distance) + 'm';
+        const bestDistance = Math.floor(this.distance);
+        document.getElementById('finalScore').innerText = bestDistance + 'm';
         document.getElementById('gameOverModal').style.display = 'flex';
+
+        if (window.AuthLeaderboard) {
+            window.AuthLeaderboard.init()
+                .then(() => window.AuthLeaderboard.saveBestScore('noahnohah', bestDistance))
+                .catch(() => { });
+        }
     }
 
     resetGame() {
         this.gameRunning = false;
         this.distance = 0;
-        this.speed = 2;
+        this.speed = 4;
+        this.lastTime = 0;
+        this.accumulatedMs = 0;
         this.player.x = 100;
         this.player.y = 150;
         this.player.vx = 0;
@@ -296,11 +340,15 @@ class SwingEngine {
         this.generateAnchors();
         document.getElementById('gameOverModal').style.display = 'none';
         document.getElementById('statusOverlay').style.opacity = 1;
-        document.getElementById('statusOverlay').innerText = 'TOUCH TO START';
+        this.lastStatusKey = 'swing.touchToStart';
+        this.applyStatusText();
         this.draw();
     }
 
     start() {
         this.draw();
+        this.lastStatusKey = 'swing.touchToStart';
+        this.applyStatusText();
     }
 }
+

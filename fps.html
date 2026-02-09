@@ -4,11 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPS 슈팅 - 미니게임천국</title>
+    <script>
+        document.documentElement.classList.add('i18n-pending');
+        try {
+            const savedLanguage = localStorage.getItem('site_language');
+            if (savedLanguage) document.documentElement.lang = savedLanguage;
+        } catch (_) { }
+    </script>
+    <title data-i18n="home.fps.name">FPS 슈팅</title>
+    <script src="js/i18n.js" defer></script>
+    <script src="js/firebaseConfig.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+    <script src="js/services/authLeaderboard.js" defer></script>
     <style>
         * {
             margin: 0;
             padding: 0;
+        }
+
+        html.i18n-pending body {
+            visibility: hidden;
+        }
+
+        html.i18n-ready body {
+            visibility: visible;
         }
 
         body {
@@ -57,6 +78,32 @@
 
         #blocker .home-btn {
             background: linear-gradient(135deg, #444, #666);
+        }
+
+        .lang-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 6px 10px;
+            backdrop-filter: blur(6px);
+            margin-bottom: 14px;
+        }
+
+        .lang-switcher label {
+            color: #dbe7ff;
+            font-size: 0.85rem;
+        }
+
+        .lang-switcher select {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(26, 26, 46, 0.95);
+            color: #fff;
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-family: inherit;
         }
 
         #crosshair {
@@ -160,23 +207,32 @@
 
 <body>
     <div id="blocker">
-        <h1>🔫 FPS 슈팅</h1>
-        <p>WASD: 이동</p>
-        <p>마우스: 조준</p>
-        <p>좌클릭: 발사 (실탄 발사!)</p>
-        <p>R: 재장전, ESC: 일시정지</p>
+        <div class="lang-switcher">
+            <label for="languageSelectFps" data-i18n="lang.label">언어</label>
+            <select id="languageSelectFps" data-language-select>
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <h1 data-i18n="fps.title">🔫 FPS 슈팅</h1>
+        <p data-i18n="fps.help.move">WASD: 이동</p>
+        <p data-i18n="fps.help.aim">마우스: 조준</p>
+        <p data-i18n="fps.help.fire">좌클릭: 발사 (실탄 발사!)</p>
+        <p data-i18n="fps.help.reload">R: 재장전, ESC: 일시정지</p>
         <div>
-            <button id="mainBtn" onclick="startGame()">게임 시작</button>
-            <button class="home-btn" onclick="location.href='index.html'">홈으로</button>
+            <button id="mainBtn" onclick="startGame()" data-i18n="fps.start">게임 시작</button>
+            <button class="home-btn" onclick="location.href='index.html'" data-i18n="fps.home">홈으로</button>
+            <button id="fpsGoogleLoginBtn" data-i18n="auth.loginGoogle">Google 로그인</button>
+            <button id="fpsLogoutBtn" data-i18n="auth.logout">로그아웃</button>
         </div>
     </div>
     <div id="crosshair" style="display:none;"></div>
     <div id="muzzleFlash"></div>
     <div id="hud" style="display:none;">
-        탄약: <span id="ammo">30</span> / 30<br>
-        처치: <span id="kills">0</span>
+        <span data-i18n="fps.hud.ammo">탄약</span>: <span id="ammo">30</span> / 30<br>
+        <span data-i18n="fps.hud.kills">처치</span>: <span id="kills">0</span>
     </div>
-    <div id="score" style="display:none;">SCORE: <span id="scoreValue">0</span></div>
+    <div id="score" style="display:none;"><span data-i18n="fps.hud.score">점수</span>: <span id="scoreValue">0</span></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -209,12 +265,28 @@
         let isFiring = false;
         let lastShootTime = 0;
         const shootDelay = 100; // Fast fire rate
+        const FIXED_STEP_MS = 1000 / 60;
+        const MAX_ACCUMULATED_MS = 250;
+        let accumulatedMs = 0;
+        let lastFrameTime = 0;
+
+        function updateFpsAuthButtons(user) {
+            const logoutBtn = document.getElementById('fpsLogoutBtn');
+            if (!logoutBtn) return;
+            logoutBtn.style.display = user ? 'inline-block' : 'none';
+        }
+
+        function t(key, fallback, vars) {
+            if (window.AppI18n) return window.AppI18n.t(key, fallback, vars);
+            if (!vars) return fallback;
+            return Object.keys(vars).reduce((acc, itemKey) => acc.replaceAll(`{${itemKey}}`, vars[itemKey]), fallback);
+        }
 
         // Physics
         let playerVelocityY = 0;
         let canJump = false;
-        const gravity = 15.0; // Reduced gravity for floatier feel
-        const jumpForce = 15.0; // Increased jump force (1.5x)
+        const gravity = 60.0; // Faster jump arc
+        const jumpForce = 15.0; // Faster takeoff with similar peak height
 
         function init() {
             // Scene
@@ -303,7 +375,6 @@
             // Events
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
-            document.addEventListener('mousedown', onShoot);
             document.addEventListener('mousemove', onMouseMove);
             window.addEventListener('resize', onWindowResize);
 
@@ -325,10 +396,10 @@
                     if (!isGameOver) {
                         // Pause Menu
                         blocker.style.display = 'flex';
-                        blocker.querySelector('h1').textContent = 'PAUSED';
-                        blocker.querySelector('p').innerHTML = '다시 하려면 화면을 클릭하거나 버튼을 누르세요.';
+                        blocker.querySelector('h1').textContent = t('fps.pauseTitle', '일시정지');
+                        blocker.querySelector('p').innerHTML = t('fps.pauseHelp', '계속하려면 화면을 클릭하거나 버튼을 누르세요.');
                         const mainBtn = document.getElementById('mainBtn');
-                        mainBtn.textContent = 'RESUME';
+                        mainBtn.textContent = t('fps.resume', '계속하기');
                         mainBtn.onclick = () => {
                             renderer.domElement.requestPointerLock();
                         };
@@ -658,6 +729,10 @@
 
         document.addEventListener('mousedown', (e) => {
             if (document.pointerLockElement === renderer.domElement && e.button === 0) {
+                if (!isFiring) {
+                    onShoot(e);
+                    lastShootTime = Date.now();
+                }
                 isFiring = true;
             }
         });
@@ -707,20 +782,6 @@
             flash.style.opacity = 1;
             setTimeout(() => flash.style.opacity = 0, 50);
 
-            // Gun recoil visual
-            gunGroup.position.z += 0.05;
-            gunGroup.rotation.x -= 0.1;
-
-            // Camera recoil (kick up) -- Reduced
-            pitch += 0.02;
-            pitch = Math.min(Math.PI / 2 - 0.1, pitch);
-            camera.rotation.x = pitch;
-
-            setTimeout(() => {
-                gunGroup.position.z -= 0.05;
-                gunGroup.rotation.x += 0.1;
-            }, 50);
-
             // Create bullet
             const bulletGeo = new THREE.SphereGeometry(0.05, 8, 8);
             const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
@@ -740,6 +801,20 @@
 
             scene.add(bullet);
             bullets.push(bullet);
+
+            // Gun recoil visual
+            gunGroup.position.z += 0.05;
+            gunGroup.rotation.x -= 0.1;
+
+            // Camera recoil (kick up) -- Reduced
+            pitch += 0.02;
+            pitch = Math.min(Math.PI / 2 - 0.1, pitch);
+            camera.rotation.x = pitch;
+
+            setTimeout(() => {
+                gunGroup.position.z -= 0.05;
+                gunGroup.rotation.x += 0.1;
+            }, 50);
         }
 
         function updateBullets() {
@@ -803,103 +878,120 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
+        function stepGame() {
+            const delta = 0.016;
+            const now = Date.now();
 
-            if (isLocked && !isGameOver) {
-                const delta = 0.016;
-                const now = Date.now();
-
-                // 1. Auto-Fire Logic
-                if (isFiring && now - lastShootTime > shootDelay) {
-                    if (ammo > 0) {
-                        onShoot();
-                        lastShootTime = now;
-                    } else {
-                        reload();
-                    }
+            // 1. Auto-Fire Logic
+            if (isFiring && now - lastShootTime > shootDelay) {
+                if (ammo > 0) {
+                    onShoot();
+                    lastShootTime = now;
+                } else {
+                    reload();
                 }
+            }
 
-                // 2. Physics (Y-Axis)
-                playerVelocityY -= gravity * delta;
+            // 2. Physics (Y-Axis)
+            playerVelocityY -= gravity * delta;
 
-                // Proposed new Y position
-                const newY = camera.position.y + playerVelocityY * delta;
+            // Proposed new Y position
+            const newY = camera.position.y + playerVelocityY * delta;
 
-                // Collision Test Y for Landing
-                // We check if a point slightly below our feet intersects a box
-                const feetPos = new THREE.Vector3(camera.position.x, newY - playerHeight + 0.1, camera.position.z);
-                const landingY = checkCollision(feetPos, true); // True = return Y top
+            // Collision Test Y for Landing
+            // We check if a point slightly below our feet intersects a box
+            const feetPos = new THREE.Vector3(camera.position.x, newY - playerHeight + 0.1, camera.position.z);
+            const landingY = checkCollision(feetPos, true); // True = return Y top
 
-                if (landingY !== null && playerVelocityY <= 0) {
-                    if (newY - playerHeight <= landingY) {
-                        // Land
-                        camera.position.y = landingY + playerHeight;
-                        playerVelocityY = 0;
-                        onGround = true;
-                    } else {
-                        camera.position.y = newY;
-                        onGround = false;
-                    }
+            if (landingY !== null && playerVelocityY <= 0) {
+                if (newY - playerHeight <= landingY) {
+                    // Land
+                    camera.position.y = landingY + playerHeight;
+                    playerVelocityY = 0;
+                    onGround = true;
                 } else {
                     camera.position.y = newY;
                     onGround = false;
                 }
+            } else {
+                camera.position.y = newY;
+                onGround = false;
+            }
 
-                // Minimum ground level (fallback)
-                if (camera.position.y < playerHeight) {
-                    camera.position.y = playerHeight;
-                    playerVelocityY = 0;
-                    onGround = true;
+            // Minimum ground level (fallback)
+            if (camera.position.y < playerHeight) {
+                camera.position.y = playerHeight;
+                playerVelocityY = 0;
+                onGround = true;
+            }
+
+            // 3. Movement (X/Z Axis)
+            velocity.x -= velocity.x * 8 * delta;
+            velocity.z -= velocity.z * 8 * delta;
+
+            direction.z = Number(moveForward) - Number(moveBackward);
+            direction.x = Number(moveRight) - Number(moveLeft);
+            direction.normalize();
+
+            const speed = isSprinting ? 120 : 60;
+            if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
+            if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
+
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+            forward.y = 0; forward.normalize();
+
+            const right = new THREE.Vector3();
+            right.crossVectors(forward, new THREE.Vector3(0, 1, 0));
+
+            // Calculate total displacement in World Space
+            const totalMove = new THREE.Vector3();
+            totalMove.addScaledVector(right, -velocity.x * delta);
+            totalMove.addScaledVector(forward, -velocity.z * delta);
+
+            // Apply World X Movement
+            camera.position.x += totalMove.x;
+            if (checkCollision(camera.position)) {
+                camera.position.x -= totalMove.x; // Block X but allow Z
+            }
+
+            // Apply World Z Movement
+            camera.position.z += totalMove.z;
+            if (checkCollision(camera.position)) {
+                camera.position.z -= totalMove.z; // Block Z but allow X
+            }
+
+            // 4. Game Logic updates
+            updateBullets();
+            updateEnemyAI();
+            updateEnemyBullets();
+            updateHealthPacks();
+
+            // Animate targets
+            targets.forEach((t, i) => {
+                t.rotation.y = Math.sin(Date.now() * 0.001 + i) * 0.3;
+            });
+        }
+
+        function animate(time = 0) {
+            requestAnimationFrame(animate);
+
+            if (!lastFrameTime) lastFrameTime = time;
+            const elapsed = Math.min(time - lastFrameTime, MAX_ACCUMULATED_MS);
+            lastFrameTime = time;
+
+            if (isLocked && !isGameOver) {
+                accumulatedMs += elapsed;
+
+                while (accumulatedMs >= FIXED_STEP_MS && isLocked && !isGameOver) {
+                    stepGame();
+                    accumulatedMs -= FIXED_STEP_MS;
                 }
+            } else {
+                accumulatedMs = 0;
+            }
 
-                // 3. Movement (X/Z Axis)
-                velocity.x -= velocity.x * 8 * delta;
-                velocity.z -= velocity.z * 8 * delta;
-
-                direction.z = Number(moveForward) - Number(moveBackward);
-                direction.x = Number(moveRight) - Number(moveLeft);
-                direction.normalize();
-
-                const speed = isSprinting ? 80 : 40;
-                if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
-                if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
-
-                const forward = new THREE.Vector3();
-                camera.getWorldDirection(forward);
-                forward.y = 0; forward.normalize();
-
-                const right = new THREE.Vector3();
-                right.crossVectors(forward, new THREE.Vector3(0, 1, 0));
-
-                // Calculate total displacement in World Space
-                const totalMove = new THREE.Vector3();
-                totalMove.addScaledVector(right, -velocity.x * delta);
-                totalMove.addScaledVector(forward, -velocity.z * delta);
-
-                // Apply World X Movement
-                camera.position.x += totalMove.x;
-                if (checkCollision(camera.position)) {
-                    camera.position.x -= totalMove.x; // Block X but allow Z
-                }
-
-                // Apply World Z Movement
-                camera.position.z += totalMove.z;
-                if (checkCollision(camera.position)) {
-                    camera.position.z -= totalMove.z; // Block Z but allow X
-                }
-
-                // 4. Game Logic updates
-                updateBullets();
-                updateEnemyAI();
-                updateEnemyBullets();
-                updateHealthPacks();
-
-                // Animate targets
-                targets.forEach((t, i) => {
-                    t.rotation.y = Math.sin(Date.now() * 0.001 + i) * 0.3;
-                });
-            } else if (isGameOver) {
+            if (isGameOver) {
                 camera.rotation.y += 0.005;
             }
 
@@ -1111,12 +1203,21 @@
 
             const blocker = document.getElementById('blocker');
             blocker.style.display = 'flex';
-            blocker.querySelector('h1').textContent = 'GAME OVER';
-            blocker.querySelector('p').innerHTML = `최종 점수: ${score}<br>처치 수: ${kills}`;
+            blocker.querySelector('h1').textContent = t('fps.gameOver', '게임 오버');
+            blocker.querySelector('p').innerHTML = t('fps.finalResult', `최종 점수: ${score}<br>처치 수: ${kills}`, {
+                score,
+                kills
+            });
 
             const btn = document.getElementById('mainBtn');
-            btn.textContent = '다시 하기';
+            btn.textContent = t('fps.retry', '다시 하기');
             btn.onclick = () => location.reload();
+
+            if (window.AuthLeaderboard) {
+                window.AuthLeaderboard.init()
+                    .then(() => window.AuthLeaderboard.saveBestScore('fps', score))
+                    .catch(() => { });
+            }
         }
 
         function startGame() {
@@ -1126,6 +1227,9 @@
             ammo = maxAmmo;
             isGameOver = false;
             enemyBullets = [];
+            accumulatedMs = 0;
+            lastFrameTime = performance.now();
+            lastShootTime = 0;
 
             // Reset UI
             if (document.getElementById('healthValue'))
@@ -1143,6 +1247,47 @@
 
             renderer.domElement.requestPointerLock();
         }
+
+        window.addEventListener('app:language-changed', () => {
+            const blocker = document.getElementById('blocker');
+            if (!blocker || blocker.style.display !== 'flex') return;
+
+            const mainBtn = document.getElementById('mainBtn');
+            if (isGameOver) {
+                blocker.querySelector('h1').textContent = t('fps.gameOver', '게임 오버');
+                blocker.querySelector('p').innerHTML = t('fps.finalResult', `최종 점수: ${score}<br>처치 수: ${kills}`, {
+                    score,
+                    kills
+                });
+                mainBtn.textContent = t('fps.retry', '다시 하기');
+            } else if (!isLocked) {
+                blocker.querySelector('h1').textContent = t('fps.pauseTitle', '일시정지');
+                blocker.querySelector('p').innerHTML = t('fps.pauseHelp', '계속하려면 화면을 클릭하거나 버튼을 누르세요.');
+                mainBtn.textContent = t('fps.resume', '계속하기');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!window.AuthLeaderboard) return;
+            await window.AuthLeaderboard.init();
+            const loginBtn = document.getElementById('fpsGoogleLoginBtn');
+            const logoutBtn = document.getElementById('fpsLogoutBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async () => {
+                    try {
+                        await window.AuthLeaderboard.signIn();
+                    } catch (err) {
+                        alert(`로그인 실패: ${err.message}`);
+                    }
+                });
+            }
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    await window.AuthLeaderboard.signOut();
+                });
+            }
+            window.AuthLeaderboard.onAuthChanged(updateFpsAuthButtons);
+        });
 
         init();
         animate();
